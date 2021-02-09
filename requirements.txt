@@ -1,0 +1,4 @@
+yahoo_fin
+pandas
+requests
+requests_html
