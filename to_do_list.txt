@@ -3,3 +3,5 @@
 3. collect data for several stocks
 4. final spreadsheet
 5. add hystorical data and growth calculation
+6. get earnings calendar to understand when new update is required
+7. define interface to in=mplement and rework current class to correspond new requirements
