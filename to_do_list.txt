@@ -1,0 +1,5 @@
+1. connect database
+2. restore data from database and update only price and other data only if required
+3. collect data for several stocks
+4. final spreadsheet
+5. add hystorical data and growth calculation
