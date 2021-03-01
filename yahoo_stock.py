@@ -9,7 +9,7 @@ from interfaces import IStockFundamentals
 
 
 class YahooStockData(IStockFundamentals):
-    ticker = None
+    _ticker = None
     yahoo_obj = None
     _market_cap = None
     _pe = None
@@ -62,7 +62,7 @@ class YahooStockData(IStockFundamentals):
         self._pe = summary['trailingPE']
         self._forward_pe = summary['forwardPE']
         self._ps = summary['priceToSalesTrailing12Months']
-        self._div_yield = summary['dividendYield'] * 100
+        self._div_yield = summary['dividendYield']
         self._div_payout_ratio = summary['payoutRatio']
         self._beta = summary['beta']
         self._avg_volume = summary['averageVolume']
@@ -140,7 +140,7 @@ class YahooStockData(IStockFundamentals):
     @property
     def div_yield(self):
         if not self._div_yield:
-            self._div_yield = self.yahoo_obj.get_dividend_yield()
+            self._div_yield = self.yahoo_obj.get_dividend_yield() or 0
         return self._div_yield * 100
 
     @property
