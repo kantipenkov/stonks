@@ -44,6 +44,6 @@ class StockData:
 
 
 if __name__ == '__main__':
-    stocks = StockData(YahooStockData ,['NVDA', 'AMD'])
+    stocks = StockData(YahooStockData ,['NVDA'])
     # print(stock.pe)
     import pdb;pdb.set_trace()

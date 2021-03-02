@@ -82,6 +82,13 @@ class YahooStockData(IStockFundamentals):
         # self._wacc
         # self._div_growth
 
+    def get_growth(self, data):
+        accum = 0
+        for i in range(1, len(data)):
+            accum += (data[i] - data[i - 1]) / data[i - 1]
+        
+        return accum / len(data)
+
     @property
     def ticker(self):
         return self._ticker
@@ -191,19 +198,49 @@ class YahooStockData(IStockFundamentals):
             self.get_data()
         return self._beta
 
+    @property
+    def assets_hystory(self):
+        return self._financials.assets_hystory
+
+    @property
+    def assets_growth(self):
+        return self.get_growth(self.assets_hystory) * 100
 
 
+    @property
+    def equity_hystory(self):
+        return self._financials.equity_hystory
+    
+    @property
+    def equity_growth(self):
+        return self.get_growth(self.equity_hystory) * 100
+   
+    @property
+    def net_income_hystory(self):
+        return self._financials.net_income_hystory
+    
+    @property
+    def net_income_growth(self):
+        return self.get_growth(self.net_income_hystory.values) * 100
+
+    @property
+    def revenue_hystory(self):
+        return self._financials.revenue_hystory
+    
+    @property
+    def revenue_growth(self):
+        return self.get_growth(self.revenue_hystory.values) * 100
 
 class StockFinansials:
     earnings_quarterly = None
-    erarnings_yearly = None
+    earnings_yearly = None
 
     def __init__(self, ticker, yahoo_obj):
         self.ticker = ticker
         self.yahoo_obj = yahoo_obj
         earnings_data = self.yahoo_obj.get_stock_earnings_data()
-        self.earnings_quarterly = pd.DataFrame(earnings_data[self.ticker]['financialsData']['quarterly'])
-        self.erarnings_yearly = pd.DataFrame(earnings_data[self.ticker]['financialsData']['yearly'])
+        self.earnings_quarterly = pd.DataFrame(earnings_data[self.ticker]['financialsData']['quarterly']).set_index("date").T
+        self.earnings_yearly = pd.DataFrame(earnings_data[self.ticker]['financialsData']['yearly']).set_index("date").T
         # self.balances = pd.DataFrame({datetime.strptime(list(x.keys())[0], '%Y-%m-%d'): x[list(x.keys())[0]] for x in self.yahoo_obj.get_financial_stmts('annual', 'balance')['balanceSheetHistory'][self.ticker]}) 
         # self.balances = self.balances[self.balances.columns.sort_values()]
         self.balances_y = self._get_financial_data_frame('annual', 'balance')
@@ -228,7 +265,7 @@ class StockFinansials:
 
     @property
     def earnings_ttm(self):
-        return self.earnings_quarterly.loc[:,  "earnings"].sum()
+        return self.earnings_quarterly.loc["earnings", :].sum()
 
     @property
     def stockholders_equity_avg(self, num_of_periods: int=2):
@@ -249,3 +286,20 @@ class StockFinansials:
     @property
     def ttm_operating_cash_flow(self):
         return self.cash_q.loc['totalCashFromOperatingActivities', :].sum()
+
+    @property
+    def assets_hystory(self):
+        return self.balances_y.loc['totalAssets', :]
+
+    @property
+    def equity_hystory(self):
+        return self.balances_y.loc['totalStockholderEquity', :]
+
+    @property
+    def net_income_hystory(self):
+        return self.earnings_yearly.loc["earnings", :]
+
+    @property
+    def revenue_hystory(self):
+        return self.earnings_yearly.loc["revenue", :]
+    

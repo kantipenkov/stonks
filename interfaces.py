@@ -78,6 +78,38 @@ class IStockFundamentals():
     def beta(self):
         raise NotImplementedError()
 
+    @property
+    def assets_hystory(self):
+        raise NotImplementedError()
+
+    @property
+    def assets_growth(self):
+        raise NotImplementedError()
+
+    @property
+    def equity_hystory(self):
+        raise NotImplementedError()
+    
+    @property
+    def equity_growth(self):
+        raise NotImplementedError()
+
+    @property
+    def net_income_hystory(self):
+        raise NotImplementedError()
+    
+    @property
+    def net_income_growth(self):
+        raise NotImplementedError()
+
+    @property
+    def revenue_hystory(self):
+        raise NotImplementedError()
+    
+    @property
+    def revenue_growth(self):
+        raise NotImplementedError()
+
     
 
 
@@ -100,7 +132,10 @@ class IStockFundamentals():
                 "Payout Ratio"                 : self.div_payout_ratio,
                 "Operating Cash Flow per Share": self.ocf_per_share,
                 "Short interest"               : self.short_interest,
-                "Beta"                         : self.beta,
+                "Assets Growth"                : self.assets_growth,
+                "Equity Growth"                : self.equity_growth,
+                "Net income Growth"            : self.net_income_growth,
+                "Revenue Growth"               : self.revenue_growth,
                 # add hystory of earnings, essetsd equity and calculated growth
             },
             index = [self.ticker]
