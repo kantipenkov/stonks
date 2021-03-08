@@ -240,9 +240,10 @@ class StockFinansials:
         self.yahoo_obj = yahoo_obj
         earnings_data = self.yahoo_obj.get_stock_earnings_data()
         self.earnings_quarterly = pd.DataFrame(earnings_data[self.ticker]['financialsData']['quarterly'])
-        self.earnings_quarterly = self.earnings_quarterly.set_index(self.earnings_quarterly.loc[:, "date"].values).drop(columns=["date"]).T
+        self.earnings_quarterly["date"] = pd.PeriodIndex(self.earnings_quarterly.loc[:, "date"], freq="Q").to_timestamp()
+        self.earnings_quarterly = self.earnings_quarterly.set_index(self.earnings_quarterly.loc[:, "date"]).drop(columns=["date"]).T
         self.earnings_yearly = pd.DataFrame(earnings_data[self.ticker]['financialsData']['yearly'])
-        self.earnings_yearly = self.earnings_yearly.set_index(self.earnings_yearly.loc[:, "date"].values).drop(columns=["date"]).T
+        self.earnings_yearly = self.earnings_yearly.set_index(map(lambda x: datetime.strptime(str(x), "%Y"), self.earnings_yearly.loc[:, "date"])).drop(columns=["date"]).T
         # self.balances = pd.DataFrame({datetime.strptime(list(x.keys())[0], '%Y-%m-%d'): x[list(x.keys())[0]] for x in self.yahoo_obj.get_financial_stmts('annual', 'balance')['balanceSheetHistory'][self.ticker]}) 
         # self.balances = self.balances[self.balances.columns.sort_values()]
         self.balances_y = self._get_financial_data_frame('annual', 'balance')
