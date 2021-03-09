@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 class CompanyModel(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
     ticker = models.CharField(max_length=10, unique=True)
     description = models.TextField()
     last_earnings_update = models.DateField()
@@ -12,7 +12,7 @@ class CompanyModel(models.Model):
 
 class FinancialsDataModel(models.Model):
     company = models.ForeignKey(CompanyModel, on_delete=models.DO_NOTHING)
-    origin = models.CharField()
+    origin = models.CharField(max_length=30)
     date = models.DateField()
     stockholders_equity = models.IntegerField()
     total_assets = models.IntegerField()
@@ -35,7 +35,7 @@ class FinancialsDataModel(models.Model):
 
 class CurrentDataModel(models.Model):
     company = models.ForeignKey(CompanyModel, on_delete=models.DO_NOTHING)
-    origin = models.CharField()
+    origin = models.CharField(max_length=30)
     market_cap = models.FloatField()
     current_price = models.FloatField()
     pe = models.FloatField()
@@ -48,7 +48,7 @@ class CurrentDataModel(models.Model):
     short_interest = models.FloatField()
     beta = models.FloatField()
 
-# class WatchListModel(models.Model):
+# class WatchListModel(models.Model): # reorganize to manytomany
 #     name = models.CharField()
 #     owner = models.ForeignKey(ProfileModel)
 
