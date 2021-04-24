@@ -11,5 +11,4 @@ router.register(r'company-earnings', views.CopmanyEarningsViewSet, basename="cop
 
 urlpatterns = [
     path('', include(router.urls)),
-    # path('company-earnings1/<str:ticker>/', views.CopmanyEarningsView.as_view()),
 ]

@@ -21,20 +21,26 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
-    # @action()
+    @action(detail=True)
+    def earnings(self, request, *args, **kwargs):
+        company = self.get_object()
+        queryset = CopmanyEarnings.objects.filter(copmany=company.ticker)
+        serializer = CopmanyEarningsSerializer(queryset, many=True, context={'request':request})
+        return Response(serializer.data)
 
 class CopmanyEarningsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CopmanyEarnings.objects.all()
     serializer_class = CopmanyEarningsSerializer
-    def list(self, request):
-        queryset = CopmanyEarnings.objects.all()
-        serializer = CopmanyEarningsSerializer(queryset, many=True, context={'request':request})
-        return Response(serializer.data)
+    # def list(self, request):
+    #     queryset = CopmanyEarnings.objects.all()
+    #     serializer = CopmanyEarningsSerializer(queryset, many=True, context={'request':request})
+    #     return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
-        queryset = CopmanyEarnings.objects.filter(copmany=pk)
-        serializer = CopmanyEarningsSerializer(queryset, many=True, context={'request':request})
-        return Response(serializer.data)
+    # def retrieve(self, request, pk=None):
+    #     queryset = CopmanyEarnings.objects.filter(copmany=pk)
+    #     serializer = CopmanyEarningsSerializer(queryset, many=True, context={'request':request})
+    #     return Response(serializer.data)
+
 
 
 

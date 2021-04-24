@@ -13,9 +13,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'id', 'username']
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
+    earnings = serializers.HyperlinkedIdentityField(view_name="company-earnings")
+    
     class Meta:
         model = Company
-        fields = ['url', 'name', 'ticker', 'description']
+        fields = ['url', 'name', 'ticker', 'description', 'earnings']
 
 class CopmanyEarningsSerializer(serializers.HyperlinkedModelSerializer):
     company = serializers.ReadOnlyField(source='company.name')
