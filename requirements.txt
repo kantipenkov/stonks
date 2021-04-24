@@ -1,4 +1,5 @@
-yahoofinancials
+FundamentalAnalysis
 pandas
 
 django
+djangorestframework
