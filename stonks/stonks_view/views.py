@@ -63,7 +63,7 @@ class CompanyCashFlowViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CompanyCashFlow.objects.all()
     serializer_class = CompanyCashFlowSerilaizer
 
-class WatchListViewSet(viewsets.ReadOnlyModelViewSet):
+class WatchListViewSet(viewsets.ModelViewSet):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
     permission_classes=[permissions.IsAuthenticatedOrReadOnly]
@@ -93,7 +93,7 @@ class WatchListViewSet(viewsets.ReadOnlyModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-class WatchItemsViewSet(viewsets.ReadOnlyModelViewSet):
+class WatchItemsViewSet(viewsets.ModelViewSet):
     queryset = WatchItem.objects.all()
     serializer_class = WatchItemSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
