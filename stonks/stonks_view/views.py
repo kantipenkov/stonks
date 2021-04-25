@@ -74,6 +74,21 @@ class WatchListViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = WatchItemSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @action(detail=True)
+    def compare(self, request, *args, **kwargs):
+        # import itertools
+        watch_list = self.get_object()
+        watch_companies = WatchItem.objects.filter(watch_list=watch_list).values("company")
+        earnings_queryset = CompanyEarnings.objects.filter(company__in=watch_companies).order_by("company")
+        balance_queryset = CompanyBalance.objects.filter(company__in=watch_companies).order_by("company")
+        cash_flow_queryset = CompanyCashFlow.objects.filter(company__in=watch_companies).order_by("company")
+
+        earnings_serializer = CompanyEarningsSerializer(earnings_queryset, many=True, context={'request': request})
+        balance_serializer = CompanyBalanceSerializer(balance_queryset, many=True, context={'request': request})
+        cash_flow_serializer = CompanyCashFlowSerilaizer(cash_flow_queryset, many=True, context={'request': request})
+        serilaizer_list = (earnings_serializer.data, balance_serializer.data, cash_flow_serializer.data)
+        return Response(data=serilaizer_list)
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
