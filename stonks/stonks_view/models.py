@@ -105,6 +105,9 @@ class WatchList(models.Model):
     name = models.CharField(max_length=50)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
+
 class WatchItem(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     watch_list = models.ForeignKey(WatchList, on_delete=models.CASCADE)

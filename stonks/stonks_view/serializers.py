@@ -138,20 +138,23 @@ class CompanyCashFlowSerilaizer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class WatchItemSerializer(serializers.HyperlinkedModelSerializer):
-    company = serializers.ReadOnlyField(source='company.name')
-    watch_list = serializers.ReadOnlyField(source='watch_list.name')
-
-    class Meta:
-        model = WatchItem
-        fields = ['url', 'id', 'watch_list', 'company']
-        # fields = ['url', 'id', 'company']
-
 class WatchListSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    # owner = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     watch_items = serializers.HyperlinkedIdentityField(view_name='watchlist-items')
     
     class Meta:
         model = WatchList
         fields = ['url', 'id', 'name', 'owner', 'watch_items']
         # fields = ['url', 'id', 'name', 'owner']
+
+
+class WatchItemSerializer(serializers.HyperlinkedModelSerializer):
+    company = UserSerializer
+    # company = serializers.ReadOnlyField(source='company.name')
+    watch_list = WatchListSerializer
+
+    class Meta:
+        model = WatchItem
+        fields = ['url', 'id', 'watch_list', 'company']
+        # fields = ['url', 'id', 'company']
