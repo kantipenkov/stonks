@@ -1,10 +1,7 @@
-1. connect database
-2. restore data from database and update only price and other data only if required
-6. get earnings calendar to understand when new update is required
-- add registration and model for user (check if it is possible to extend User model)
-- add watch lists should be available user watchlists and common watch lists (maybe create a proxy user for common lists)
-- add forms to edit and see all available watch lists
-- add view to show data for stonks in watch list no sorting yet
-- add screener to look for stonks with desired metrics
-- add sorting conditions
-- add highlighting 
+1. database
+    a. ticker (overview, next earnings date)
+    b. income (annual, monthly)
+    c. balance (annual, monthly)
+    d. cash flows (annual, monthly)
+2. in ticker model implement metricks calculation, check update is needed, 
+3. implement comparizon side by side

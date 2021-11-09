@@ -6,14 +6,14 @@ router = DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'companies', views.CompanyViewSet)
 router.register(r'company-earnings', views.CompanyEarningsViewSet, basename="companyearnings")
-router.register(r'company-balance', views.CompanyBalanceViewSet)
-router.register(r'company-cash-flow', views.CompanyCashFlowViewSet)
-router.register(r'watch-list', views.WatchListViewSet)
-router.register(r'watch-items', views.WatchItemsViewSet)
+# router.register(r'company-balance', views.CompanyBalanceViewSet)
+# router.register(r'company-cash-flow', views.CompanyCashFlowViewSet)
+# router.register(r'watch-list', views.WatchListViewSet)
+# router.register(r'watch-items', views.WatchItemsViewSet)
 from pprint import pprint
 pprint(router.urls)
-pprint(router.get_default_basename(views.WatchItemsViewSet))
-pprint(router.get_default_basename(views.WatchListViewSet))
+# pprint(router.get_default_basename(views.WatchItemsViewSet))
+# pprint(router.get_default_basename(views.WatchListViewSet))
 
 
 # user_list
