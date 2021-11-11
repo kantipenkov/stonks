@@ -1,33 +1,33 @@
 from rest_framework import serializers
 
-from django.contrib.auth.models import User
-from stonks_view.models import Company, CompanyEarnings
+# from django.contrib.auth.models import User
+from finansials.models import Company, CompanyIncomeStatements
 # from stonks_view.models import Company, CompanyBalance, CompanyCashFlow, CompanyEarnings, WatchList, WatchItem
 
 
 # class 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+# class UserRegistrationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'password']
+#         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+#     def create(self, validated_data):
+#         password = validated_data.pop('password')
+#         user = User(**validated_data)
+#         user.set_password(password)
+#         user.save()
+#         return user
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+# class UserSerializer(serializers.HyperlinkedModelSerializer):
 
-    class Meta:
-        model = User
-        fields = ['url', 'id', 'username']
+#     class Meta:
+#         model = User
+#         fields = ['url', 'id', 'username']
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
-    earnings = serializers.HyperlinkedIdentityField(view_name="company-earnings")
+    earnings = serializers.HyperlinkedIdentityField(view_name="companyincomestatements-detail")
     # balance = serializers.HyperlinkedIdentityField(view_name='company-balance')
     # cash_flow = serializers.HyperlinkedIdentityField(view_name='company-cash-flow')
 
@@ -37,12 +37,13 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
         # fields = ['url', 'name', 'ticker', 'description', 'earnings', 'balance', 'cash_flow']
         fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'earnings']
 
-class CompanyEarningsSerializer(serializers.HyperlinkedModelSerializer):
+class CompanyIncomeSerializer(serializers.HyperlinkedModelSerializer):
     company = serializers.ReadOnlyField(source='company.name')
     class Meta:
-        model = CompanyEarnings
+        model = CompanyIncomeStatements
         fields = ['url',
                   'id',
+                  'company',
                   'date_reported',
                   'report_type',
                   'gross_profit', 

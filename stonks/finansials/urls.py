@@ -1,11 +1,11 @@
 from django.urls import path, include
-from stonks_view import views
+from finansials import views
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'users', views.UserViewSet)
+# router.register(r'users', views.UserViewSet)
 router.register(r'companies', views.CompanyViewSet)
-router.register(r'company-earnings', views.CompanyEarningsViewSet, basename="companyearnings")
+router.register(r'companyincomestatements-detail', views.CompanyIncomeViewSet, basename="companyincomestatements")
 # router.register(r'company-balance', views.CompanyBalanceViewSet)
 # router.register(r'company-cash-flow', views.CompanyCashFlowViewSet)
 # router.register(r'watch-list', views.WatchListViewSet)
@@ -20,5 +20,5 @@ pprint(router.urls)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('register/', views.UserCreate.as_view()),
+    # path('register/', views.UserCreate.as_view()),
 ]

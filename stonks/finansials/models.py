@@ -1,12 +1,12 @@
 from django.db import models
 
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 # Create your models here.
 
 class ReportType(models.TextChoices):
-    Annual = 'A'
-    Quarterly = 'Q'
+    Annual = 'Annual'
+    Quarterly = 'Quarterly'
 
 class Company(models.Model):
     ticker = models.CharField(max_length=10, primary_key=True)
@@ -18,35 +18,34 @@ class Company(models.Model):
 
 
 
-class CompanyEarnings(models.Model):
+class CompanyIncomeStatements(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     date_reported = models.DateField()
-    report_type = models.CharField(max_length=2, choices=ReportType.choices)
-
-    gross_profit = models.IntegerField()
-    total_revenue = models.IntegerField()
-    cost_of_revenue = models.IntegerField()
-    cost_of_goods_and_services_sold = models.IntegerField()
-    operating_income = models.IntegerField()
-    selling_general_and_administrative = models.IntegerField()
-    rnd = models.IntegerField()
-    operating_expences = models.IntegerField()
-    investment_income_net = models.IntegerField()
-    net_interest_income = models.IntegerField()
-    interest_income = models.IntegerField()
-    interest_expense = models.IntegerField()
-    non_interest_income = models.IntegerField()
-    other_non_operating_income = models.IntegerField()
-    deprecation = models.IntegerField()
-    deprecation_and_amortization = models.IntegerField()
-    income_before_tax = models.IntegerField()
-    income_tax_expence = models.IntegerField()
-    interest_and_debt_expence = models.IntegerField()
-    net_income_from_continuing_operations = models.IntegerField()
-    comprehensive_incom_net_of_tax = models.IntegerField()
-    ebit = models.IntegerField()
-    ebitda = models.IntegerField()
-    net_income = models.IntegerField()
+    report_type = models.CharField(max_length=9, choices=ReportType.choices)
+    gross_profit = models.BigIntegerField()
+    total_revenue = models.BigIntegerField()
+    cost_of_revenue = models.BigIntegerField()
+    cost_of_goods_and_services_sold = models.BigIntegerField()
+    operating_income = models.BigIntegerField()
+    selling_general_and_administrative = models.BigIntegerField()
+    rnd = models.BigIntegerField()
+    operating_expences = models.BigIntegerField()
+    investment_income_net = models.BigIntegerField()
+    net_interest_income = models.BigIntegerField()
+    interest_income = models.BigIntegerField()
+    interest_expense = models.BigIntegerField()
+    non_interest_income = models.BigIntegerField()
+    other_non_operating_income = models.BigIntegerField()
+    deprecation = models.BigIntegerField()
+    deprecation_and_amortization = models.BigIntegerField()
+    income_before_tax = models.BigIntegerField()
+    income_tax_expence = models.BigIntegerField()
+    interest_and_debt_expence = models.BigIntegerField()
+    net_income_from_continuing_operations = models.BigIntegerField()
+    comprehensive_incom_net_of_tax = models.BigIntegerField()
+    ebit = models.BigIntegerField()
+    ebitda = models.BigIntegerField()
+    net_income = models.BigIntegerField()
 
     class Meta:
         ordering = ['date_reported']

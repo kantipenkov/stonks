@@ -3,19 +3,20 @@ from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from stonks_view.serializers import UserSerializer, CompanySerializer, CompanyEarningsSerializer, UserRegistrationSerializer
-from django.contrib.auth.models import User
-from stonks_view.models import Company, CompanyEarnings
+from finansials.serializers import CompanySerializer, CompanyIncomeSerializer
+# from finansials.serializers import UserSerializer, CompanySerializer, CompanyEarningsSerializer, UserRegistrationSerializer
+# from django.contrib.auth.models import User
+from finansials.models import Company, CompanyIncomeStatements
 
-class UserCreate(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRegistrationSerializer
-    permission_classes = [permissions.AllowAny]
+# class UserCreate(generics.CreateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserRegistrationSerializer
+#     permission_classes = [permissions.AllowAny]
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# class UserViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
 
 class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Company.objects.all()
@@ -24,8 +25,8 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True)
     def earnings(self, request, *args, **kwargs):
         company = self.get_object()
-        queryset = CompanyEarnings.objects.filter(company=company.ticker)
-        serializer = CompanyEarningsSerializer(queryset, many=True, context={'request':request})
+        queryset = CompanyIncomeStatements.objects.filter(company=company.ticker)
+        serializer = CompanyIncomeSerializer(queryset, many=True, context={'request':request})
         return Response(serializer.data)
 
     # @action(detail=True)
@@ -42,9 +43,9 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     #     serializer = CompanyCashFlowSerilaizer(queryset, many=True, context={'request': request})
     #     return Response(serializer.data)
 
-class CompanyEarningsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = CompanyEarnings.objects.all()
-    serializer_class = CompanyEarningsSerializer
+class CompanyIncomeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CompanyIncomeStatements.objects.all()
+    serializer_class = CompanyIncomeSerializer
     # def list(self, request):
     #     queryset = CompanyEarnings.objects.all()
     #     serializer = CompanyEarningsSerializer(queryset, many=True, context={'request':request})
