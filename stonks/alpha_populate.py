@@ -190,13 +190,19 @@ class TickerData():
 
     def update_database(self):
         
-            
+        def convert(val: str):
+            try:
+                return int(val)
+            except ValueError:
+                logger.debug(f"Improper value to convert ({val}). Return '0' instead")
+                return 0
+
         if not Company.objects.filter(ticker=self.ticker).count():
             logger.info(f"Add company {self.ticker}")
             if not self.overview:
                 self.overview = AlphaVantage.get_overview(self.ticker)
             company = Company(
-                                ticker=ticker,
+                                ticker=self.ticker,
                                 name=self.overview["Name"],
                                 description=self.overview["Description"],
                                 industry=self.overview["Sector"],
@@ -209,44 +215,48 @@ class TickerData():
         # get all reports for the company and check if we have a new one in current report
         last_earnings_report = CompanyIncomeStatements.objects.filter(company=company).order_by("-date_reported").first()
         logger.info(last_earnings_report)
+        existing_reports = list()
         if not last_earnings_report:
             if not self.income:
                 self.income = AlphaVantage.get_income(self.ticker)
-            for report_type, db_report_type in (("annualReports", ReportType.Annual), ("quarterlyReports", ReportType.Quarterly)):
-                for report in self.income[report_type]:
+        else:
+            existing_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyIncomeStatements.objects.filter(company=company).values_list('date_reported', 'report_type')))
 
+        for report_type, db_report_type in (("annualReports", ReportType.Annual), ("quarterlyReports", ReportType.Quarterly)):
+            for report in self.income[report_type]:
+                #check that there is no report from this date and the same report type
+                if not (report["fiscalDateEnding"], db_report_type) in existing_reports:
+                    logger.info(f"New report for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
                     earnings = CompanyIncomeStatements(
                         company=company,
                         date_reported=report["fiscalDateEnding"],
                         report_type=db_report_type,
-                        gross_profit=int(report["grossProfit"]),
-                        total_revenue=int(report["totalRevenue"]),
-                        cost_of_revenue=int(report["costOfRevenue"]),
-                        cost_of_goods_and_services_sold=int(report["costofGoodsAndServicesSold"]),
-                        operating_income=int(report["operatingIncome"]),
-                        selling_general_and_administrative=int(report["sellingGeneralAndAdministrative"]),
-                        rnd=int(report["researchAndDevelopment"]),
-                        operating_expences=int(report["operatingExpenses"]),
-                        investment_income_net=int(report["investmentIncomeNet"]),
-                        net_interest_income=int(report["netInterestIncome"]),
-                        interest_income=int(report["interestIncome"]),
-                        interest_expense=int(report["interestExpense"]),
-                        non_interest_income=int(report["nonInterestIncome"]),
-                        other_non_operating_income=int(report["otherNonOperatingIncome"]),
-                        deprecation=int(report["depreciation"]),
-                        deprecation_and_amortization=int(report["depreciationAndAmortization"]),
-                        income_before_tax=int(report["incomeBeforeTax"]),
-                        income_tax_expence=int(report["incomeTaxExpense"]),
-                        interest_and_debt_expence=int(report["interestAndDebtExpense"]),
-                        net_income_from_continuing_operations=int(report["netIncomeFromContinuingOperations"]),
-                        comprehensive_incom_net_of_tax=int(report["comprehensiveIncomeNetOfTax"]),
-                        ebit=int(report["ebit"]),
-                        ebitda=int(report["ebitda"]),
-                        net_income=int(report["netIncome"]),
+                        gross_profit=convert(report["grossProfit"]),
+                        total_revenue=convert(report["totalRevenue"]),
+                        cost_of_revenue=convert(report["costOfRevenue"]),
+                        cost_of_goods_and_services_sold=convert(report["costofGoodsAndServicesSold"]),
+                        operating_income=convert(report["operatingIncome"]),
+                        selling_general_and_administrative=convert(report["sellingGeneralAndAdministrative"]),
+                        rnd=convert(report["researchAndDevelopment"]),
+                        operating_expences=convert(report["operatingExpenses"]),
+                        investment_income_net=convert(report["investmentIncomeNet"]),
+                        net_interest_income=convert(report["netInterestIncome"]),
+                        interest_income=convert(report["interestIncome"]),
+                        interest_expense=convert(report["interestExpense"]),
+                        non_interest_income=convert(report["nonInterestIncome"]),
+                        other_non_operating_income=convert(report["otherNonOperatingIncome"]),
+                        deprecation=convert(report["depreciation"]),
+                        deprecation_and_amortization=convert(report["depreciationAndAmortization"]),
+                        income_before_tax=convert(report["incomeBeforeTax"]),
+                        income_tax_expence=convert(report["incomeTaxExpense"]),
+                        interest_and_debt_expence=convert(report["interestAndDebtExpense"]),
+                        net_income_from_continuing_operations=convert(report["netIncomeFromContinuingOperations"]),
+                        comprehensive_incom_net_of_tax=convert(report["comprehensiveIncomeNetOfTax"]),
+                        ebit=convert(report["ebit"]),
+                        ebitda=convert(report["ebitda"]),
+                        net_income=convert(report["netIncome"]),
                     )
                     earnings.save()
-
-            
         
 def api_timeout_manager_test():
     ApiTimeoutManager.set_requests_limiters(5, 12)

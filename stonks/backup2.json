@@ -29,9 +29,66 @@
                 "ebit": "4593000000",
                 "ebitda": "5691000000",
                 "netIncome": "4332000000"
+            },
+            {
+                "fiscalDateEnding": "2020-01-26",
+                "reportedCurrency": "USD",
+                "grossProfit": "6768000000",
+                "totalRevenue": "10866000000",
+                "costOfRevenue": "5624000000",
+                "costofGoodsAndServicesSold": "4150000000",
+                "operatingIncome": "2846000000",
+                "sellingGeneralAndAdministrative": "1093000000",
+                "researchAndDevelopment": "2829000000",
+                "operatingExpenses": "3922000000",
+                "investmentIncomeNet": "178000000",
+                "netInterestIncome": "-52000000",
+                "interestIncome": "178000000",
+                "interestExpense": "52000000",
+                "nonInterestIncome": "10918000000",
+                "otherNonOperatingIncome": "-2000000",
+                "depreciation": "355000000",
+                "depreciationAndAmortization": "381000000",
+                "incomeBeforeTax": "2970000000",
+                "incomeTaxExpense": "174000000",
+                "interestAndDebtExpense": "52000000",
+                "netIncomeFromContinuingOperations": "2796000000",
+                "comprehensiveIncomeNetOfTax": "2809000000",
+                "ebit": "3022000000",
+                "ebitda": "3403000000",
+                "netIncome": "2796000000"
             }
         ],
-        "quarterlyReports":[]
+        "quarterlyReports":[
+            {
+                "fiscalDateEnding": "2021-08-01",
+                "reportedCurrency": "USD",
+                "grossProfit": "4215000000",
+                "totalRevenue": "6507000000",
+                "costOfRevenue": "2292000000",
+                "costofGoodsAndServicesSold": "2292000000",
+                "operatingIncome": "2444000000",
+                "sellingGeneralAndAdministrative": "526000000",
+                "researchAndDevelopment": "1245000000",
+                "operatingExpenses": "1771000000",
+                "investmentIncomeNet": "6000000",
+                "netInterestIncome": "-60000000",
+                "interestIncome": "6000000",
+                "interestExpense": "60000000",
+                "nonInterestIncome": "None",
+                "otherNonOperatingIncome": "4000000",
+                "depreciation": "None",
+                "depreciationAndAmortization": "286000000",
+                "incomeBeforeTax": "2394000000",
+                "incomeTaxExpense": "20000000",
+                "interestAndDebtExpense": "60000000",
+                "netIncomeFromContinuingOperations": "2374000000",
+                "comprehensiveIncomeNetOfTax": "2368000000",
+                "ebit": "2454000000",
+                "ebitda": "2740000000",
+                "netIncome": "2374000000"
+            }
+        ]
     
     },
     "balances": {
