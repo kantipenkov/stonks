@@ -1,9 +1,12 @@
+from pprint import pprint
+import pdb
+
 from enum import Enum
 import json
 from pathlib import Path
 import requests
-from pprint import pprint
-import pdb
+import time
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -38,14 +41,70 @@ class NoApiKey(Exception):
     "Please set api key to pull some data from api"
 
 
+class ApiTimeoutManager():
+    
+    _max_requests_per_minute = 5
+    _max_requests_per_day = 500
+    _current_operrations_per_day = 0
+    _current_operations_per_minute = 0
+    _first_operation_timestamp = None
+    _first_of_five_operations_timestamp = None
+
+    @classmethod
+    def set_requests_limiters(cls, minute: int, day: int):
+        cls._max_requests_per_minute = minute
+        cls._max_requests_per_day = day
+
+    @classmethod
+    def reset_minute_counter(cls):
+        cls._first_of_five_operations_timestamp = time.time()
+        cls._current_operations_per_minute = 1
+
+    @classmethod
+    def reset_day_counter(cls):
+        cls._current_operrations_per_day = 1
+        cls._first_operation_timestamp = time.time()
+
+    @classmethod
+    def check_api_timeout(cls):
+        if not cls._first_operation_timestamp:
+            cls._first_operation_timestamp = time.time()
+            cls._first_of_five_operations_timestamp = cls._first_operation_timestamp
+        cls._current_operrations_per_day += 1
+        cls._current_operations_per_minute += 1
+        if cls._current_operations_per_minute > cls._max_requests_per_minute:
+            diff = time.time() - cls._first_of_five_operations_timestamp
+            minute_in_seconds = 60
+            if diff < minute_in_seconds:
+                break_time = minute_in_seconds - diff + 2 # to be sure
+                logger.info(f"Exceed max amount of requests per minute wait for {break_time} seconds")
+                time.sleep(break_time)
+                cls.reset_minute_counter()
+            else:
+                cls.reset_minute_counter()
+        
+        if cls._current_operrations_per_day > cls._max_requests_per_day:
+            diff =  time.time() - cls._first_operation_timestamp
+            day_in_seconds = 24 * 60 * 60
+            if diff < day_in_seconds:
+                break_time = day_in_seconds - diff + 60 # just to be sure
+                logger.info(f"Exceed maximum requests per day. Will wait for {time.strftime('%H hours %M minutes and %S seconds', time.gmtime(break_time))} seconds")
+                time.sleep(break_time)
+                cls.reset_day_counter
+            else:
+                cls.reset_day_counter()
+                time.str
+
+
 class AlphaVantage():
     api_key = None
 
     # implement time tracked our only 5 calls a minute and 500 calls a day are available
     # when request received we should wait if we exeeded available amount of calls
 
-    # def __init__(self, api_key):
-    #     self.api_key = api_key
+    @classmethod
+    def check_api_timeout(cls):
+        ApiTimeoutManager.check_api_timeout()
 
     @classmethod
     def compose_url(cls, function, ticker, api_key):
@@ -78,6 +137,7 @@ class AlphaVantage():
 
     @classmethod
     def get_fundamentals(cls, function, ticker):
+        cls.check_api_timeout()
         logger.info(f"request data for {ticker}")
         if not cls.api_key:
             raise NoApiKey("please set api key before pulling data from api" )
@@ -188,6 +248,14 @@ class TickerData():
 
             
         
+def api_timeout_manager_test():
+    ApiTimeoutManager.set_requests_limiters(5, 12)
+    start_time = time.time()
+    
+    for i in range(1,15):
+        logger.debug(f"attempt {i}, time from start {time.time() - start_time} seconds")
+        ApiTimeoutManager.check_api_timeout()
+        time.sleep(1)
 
 
 if __name__ == '__main__':
