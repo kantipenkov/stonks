@@ -125,5 +125,3 @@ venv.bak/
 dmypy.json
 # database
 /data
-
-backup2 copy.json
