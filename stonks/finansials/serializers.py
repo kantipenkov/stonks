@@ -2,8 +2,7 @@ from django.db.models import fields
 from rest_framework import serializers
 
 # from django.contrib.auth.models import User
-from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport
-# from stonks_view.models import Company, CompanyBalance, CompanyCashFlow, CompanyEarnings, WatchList, WatchItem
+from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport, CompanyCashFlowReport
 
 
 # class 
@@ -28,15 +27,14 @@ from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport
 #         fields = ['url', 'id', 'username']
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
-    income_reports = serializers.HyperlinkedIdentityField(view_name="companyincomereport-detail")
+    income_reports = serializers.HyperlinkedRelatedField(view_name="companyincomereport-detail", lookup_field='ticker')
     balance_reports = serializers.HyperlinkedIdentityField(view_name='companybalancereport-detail')
-    # cash_flow = serializers.HyperlinkedIdentityField(view_name='company-cash-flow')
-
+    cash_flow_reports = serializers.HyperlinkedIdentityField(view_name='companycashflowreport-detail')
 
     class Meta:
         model = Company
         # fields = ['url', 'name', 'ticker', 'description', 'earnings', 'balance', 'cash_flow']
-        fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_reports', 'balance_reports']
+        fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_reports', 'balance_reports', 'cash_flow_reports']
 
 class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
     company = serializers.ReadOnlyField(source='company.name')
@@ -76,7 +74,7 @@ class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
 class CompanyBalanceReportSerializer(serializers.HyperlinkedModelSerializer):
     company = serializers.ReadOnlyField(source='company.name')
     class Meta:
-        model =CompanyBalanceReport
+        model = CompanyBalanceReport
         fields = ['url',
                   'id',
                   'company',
@@ -120,47 +118,42 @@ class CompanyBalanceReportSerializer(serializers.HyperlinkedModelSerializer):
                   'common_stock_shares_outstanding',
                  ]
 
-# class CompanyCashFlowSerilaizer(serializers.HyperlinkedModelSerializer):
-#     company = serializers.ReadOnlyField(source='company.name')
-
-#     class Meta:
-#         model = CompanyCashFlow
-#         fields = [
-#             'url',
-#             'id',
-#             'date_reported',
-#             'accounts_payables',
-#             'accounts_receuvables',
-#             'acquisitions_net',
-#             'capital_expenditure',
-#             'cash_at_beginning',
-#             'cash_at_end',
-#             'change_in_work_capital',
-#             'common_stock_issued',
-#             'common_stock_repurchased',
-#             'debt_repayment',
-#             'deferred_income_tax',
-#             'deprecation_and_amortization',
-#             'dividend_paid',
-#             'free_cash_flow',
-#             'inventory',
-#             'investments_in_property',
-#             'cash_provided_by_operations',
-#             'cash_used_for_investment',
-#             'cash_by_financing',
-#             'change_in_cash',
-#             'operation_cash_flow',
-#             'other_financing_activities',
-#             'other_investing_activities',
-#             'other_non_cash_items',
-#             'other_working_capital',
-#             'purchase_of_investments',
-#             'sales_maturity_of_investments',
-#             'stock_based_compensation',
-#             'company',
-#         ]
-
-
+class CompanyCashFlowReportSerializer(serializers.HyperlinkedModelSerializer):
+    company = serializers.ReadOnlyField(source='company.name')
+    class Meta:
+        model = CompanyCashFlowReport
+        fields = ['url',
+                  'id',
+                  'company',
+                  'date_reported',
+                  'report_type',
+                  'operating_cash_flow',
+                  'payments_for_operating_activities',
+                  'proceeds_from_operating_activities',
+                  'change_in_operating_liabilities',
+                  'change_in_operating_assets',
+                  'depreciation_depletion_and_amortization',
+                  'capital_expenditures',
+                  'change_in_receivables',
+                  'change_in_inventory',
+                  'profit_loss',
+                  'cash_flow_from_investment',
+                  'cash_flow_from_financing',
+                  'proceeds_from_repayment_of_short_term_debt',
+                  'proceeds_for_repurchase_of_common_stock',
+                  'proceeds_for_repurchase_of_equity',
+                  'proceeds_for_repurchase_of_preferred_stock',
+                  'divident_payout',
+                  'divident_payout_common_stock',
+                  'divident_payout_preferred_stock',
+                  'proceeds_from_issuance_of_common_stock',
+                  'proceeds_from_issuance_of_long_term_debt_and_capital_securities',
+                  'proceeds_from_issuance_of_preferred_stock',
+                  'proceeds_from_repurchase_of_equity',
+                  'proceeds_from_sale_of_treasury_stock',
+                  'change_in_cash_and_cash_equivalents',
+                  'change_in_exchange_rate',
+                 ]
 # class WatchListSerializer(serializers.HyperlinkedModelSerializer):
 #     owner = serializers.ReadOnlyField(source='owner.username')
 #     # owner = serializers.PrimaryKeyRelatedField(many=False, read_only=True)

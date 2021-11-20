@@ -7,7 +7,7 @@ router = DefaultRouter()
 router.register(r'companies', views.CompanyViewSet)
 router.register(r'companyincomereport-detail', views.CompanyIncomeReportViewSet, basename="companyincomereport")
 router.register(r'companybalancereport-detail', views.CompanyBalanceReportViewSet, basename="companybalancereport")
-# router.register(r'company-cash-flow', views.CompanyCashFlowViewSet)
+router.register(r'companycashflowreport-detail', views.CompanyCashFlowReportViewSet, basename='companycashflowreport')
 # router.register(r'watch-list', views.WatchListViewSet)
 # router.register(r'watch-items', views.WatchItemsViewSet)
 from pprint import pprint

@@ -94,3 +94,37 @@ class CompanyBalanceReport(models.Model):
 
     class Meta:
         ordering = ['date_reported']
+
+class CompanyCashFlowReport(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    date_reported = models.DateField()
+    report_type = models.CharField(max_length=9, choices=ReportType.choices)
+    operating_cash_flow = models.BigIntegerField()
+    payments_for_operating_activities = models.BigIntegerField()
+    proceeds_from_operating_activities = models.BigIntegerField()
+    change_in_operating_liabilities = models.BigIntegerField()
+    change_in_operating_assets = models.BigIntegerField()
+    depreciation_depletion_and_amortization = models.BigIntegerField()
+    capital_expenditures = models.BigIntegerField()
+    change_in_receivables = models.BigIntegerField()
+    change_in_inventory = models.BigIntegerField()
+    profit_loss = models.BigIntegerField()
+    cash_flow_from_investment = models.BigIntegerField()
+    cash_flow_from_financing = models.BigIntegerField()
+    proceeds_from_repayment_of_short_term_debt = models.BigIntegerField()
+    proceeds_for_repurchase_of_common_stock = models.BigIntegerField()
+    proceeds_for_repurchase_of_equity = models.BigIntegerField()
+    proceeds_for_repurchase_of_preferred_stock = models.BigIntegerField()
+    divident_payout = models.BigIntegerField()
+    divident_payout_common_stock = models.BigIntegerField()
+    divident_payout_preferred_stock = models.BigIntegerField()
+    proceeds_from_issuance_of_common_stock = models.BigIntegerField()
+    proceeds_from_issuance_of_long_term_debt_and_capital_securities = models.BigIntegerField()
+    proceeds_from_issuance_of_preferred_stock = models.BigIntegerField()
+    proceeds_from_repurchase_of_equity = models.BigIntegerField()
+    proceeds_from_sale_of_treasury_stock = models.BigIntegerField()
+    change_in_cash_and_cash_equivalents = models.BigIntegerField()
+    change_in_exchange_rate = models.BigIntegerField()
+
+    class Meta:
+        ordering = ['date_reported']

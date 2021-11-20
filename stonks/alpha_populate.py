@@ -25,7 +25,7 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks.settings')
 import django
 django.setup()
-from finansials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport
+from finansials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport, CompanyCashFlowReport
 
 
 def convert(val: str):
@@ -301,6 +301,56 @@ class TickerData():
                         common_stock_shares_outstanding = convert(report["commonStockSharesOutstanding"]),
                     )
                     balance_report.save()
+
+    def _update_db_cash_flows(self, company):
+        last_cash_flow_report = CompanyCashFlowReport.objects.filter(company=company).order_by("-date_reported").first()
+        
+        existing_cash_flow_reports = list()
+        if not last_cash_flow_report:
+            if not self.cash_flows:
+                self.cash_flows = AlphaVantage.get_cash_flow(self.ticker)
+        else:
+            existing_cash_flow_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyCashFlowReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
+        # collect cash_flow statements
+        logger.debug("checking for new cash flow reports for {self.tcker}")
+        for report_type, db_report_type in (("annualReports", ReportType.Annual), ("quarterlyReports", ReportType.Quarterly)):
+            for report in self.cash_flows[report_type]:
+                #check that there is no report from this date and the same report type
+                if not (report["fiscalDateEnding"], db_report_type) in existing_cash_flow_reports:
+                    logger.info(f"New report cash flow for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
+                    cash_flow_report = CompanyCashFlowReport(
+                        
+                        company = company,
+                        date_reported = report["fiscalDateEnding"],
+                        report_type = db_report_type,
+                        operating_cash_flow = convert(report["operatingCashflow"]),
+                        payments_for_operating_activities = convert(report["paymentsForOperatingActivities"]),
+                        proceeds_from_operating_activities = convert(report["proceedsFromOperatingActivities"]),
+                        change_in_operating_liabilities = convert(report["changeInOperatingLiabilities"]),
+                        change_in_operating_assets = convert(report["changeInOperatingAssets"]),
+                        depreciation_depletion_and_amortization = convert(report["depreciationDepletionAndAmortization"]),
+                        capital_expenditures = convert(report["capitalExpenditures"]),
+                        change_in_receivables = convert(report["changeInReceivables"]),
+                        change_in_inventory = convert(report["changeInInventory"]),
+                        profit_loss = convert(report["profitLoss"]),
+                        cash_flow_from_investment = convert(report["cashflowFromInvestment"]),
+                        cash_flow_from_financing = convert(report["cashflowFromFinancing"]),
+                        proceeds_from_repayment_of_short_term_debt = convert(report["proceedsFromRepaymentsOfShortTermDebt"]),
+                        proceeds_for_repurchase_of_common_stock = convert(report["paymentsForRepurchaseOfCommonStock"]),
+                        proceeds_for_repurchase_of_equity = convert(report["paymentsForRepurchaseOfEquity"]),
+                        proceeds_for_repurchase_of_preferred_stock = convert(report["paymentsForRepurchaseOfPreferredStock"]),
+                        divident_payout = convert(report["dividendPayout"]),
+                        divident_payout_common_stock = convert(report["dividendPayoutCommonStock"]),
+                        divident_payout_preferred_stock = convert(report["dividendPayoutPreferredStock"]),
+                        proceeds_from_issuance_of_common_stock = convert(report["proceedsFromIssuanceOfCommonStock"]),
+                        proceeds_from_issuance_of_long_term_debt_and_capital_securities = convert(report["proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet"]),
+                        proceeds_from_issuance_of_preferred_stock = convert(report["proceedsFromIssuanceOfPreferredStock"]),
+                        proceeds_from_repurchase_of_equity = convert(report["proceedsFromRepurchaseOfEquity"]),
+                        proceeds_from_sale_of_treasury_stock = convert(report["proceedsFromSaleOfTreasuryStock"]),
+                        change_in_cash_and_cash_equivalents = convert(report["changeInCashAndCashEquivalents"]),
+                        change_in_exchange_rate = convert(report["changeInExchangeRate"]),
+                    )
+                    cash_flow_report.save()
         
 
     def update_database(self):
@@ -330,6 +380,7 @@ class TickerData():
         # get all reports for the company and check if we have a new one in current report
         self._update_db_income(company)
         self._update_db_balance(company)
+        self._update_db_cash_flows(company)
         
 def api_timeout_manager_test():
     ApiTimeoutManager.set_requests_limiters(5, 12)
