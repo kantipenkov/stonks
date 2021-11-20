@@ -25,8 +25,15 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks.settings')
 import django
 django.setup()
-from finansials.models import Company, CompanyIncomeStatements, ReportType
+from finansials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport
 
+
+def convert(val: str):
+    try:
+        return int(val)
+    except ValueError:
+        logger.debug(f"Improper value to convert ({val}). Return '0' instead")
+        return 0
 
 class API_FUNCTIONS(Enum):
     INCOME = "INCOME_STATEMENT"
@@ -188,46 +195,23 @@ class TickerData():
             self.earnings = data["earnings"]
             self.overview = data["overview"]
 
-    def update_database(self):
+    def _update_db_income(self, company):
+        last_income_report = CompanyIncomeReport.objects.filter(company=company).order_by("-date_reported").first()
         
-        def convert(val: str):
-            try:
-                return int(val)
-            except ValueError:
-                logger.debug(f"Improper value to convert ({val}). Return '0' instead")
-                return 0
-
-        if not Company.objects.filter(ticker=self.ticker).count():
-            logger.info(f"Add company {self.ticker}")
-            if not self.overview:
-                self.overview = AlphaVantage.get_overview(self.ticker)
-            company = Company(
-                                ticker=self.ticker,
-                                name=self.overview["Name"],
-                                description=self.overview["Description"],
-                                industry=self.overview["Sector"],
-                                sector=self.overview["Industry"] 
-                             )
-            company.save()
-        else:
-            logger.info(f"overview for {self.ticker} already exists")
-            company = Company.objects.filter(ticker=self.ticker).get()
-        # get all reports for the company and check if we have a new one in current report
-        last_earnings_report = CompanyIncomeStatements.objects.filter(company=company).order_by("-date_reported").first()
-        logger.info(last_earnings_report)
-        existing_reports = list()
-        if not last_earnings_report:
+        existing_income_reports = list()
+        if not last_income_report:
             if not self.income:
                 self.income = AlphaVantage.get_income(self.ticker)
         else:
-            existing_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyIncomeStatements.objects.filter(company=company).values_list('date_reported', 'report_type')))
-
+            existing_income_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyIncomeReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
+        # collect income statements
+        logger.debug("checking for new income reports for {self.tcker}")
         for report_type, db_report_type in (("annualReports", ReportType.Annual), ("quarterlyReports", ReportType.Quarterly)):
             for report in self.income[report_type]:
                 #check that there is no report from this date and the same report type
-                if not (report["fiscalDateEnding"], db_report_type) in existing_reports:
-                    logger.info(f"New report for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
-                    earnings = CompanyIncomeStatements(
+                if not (report["fiscalDateEnding"], db_report_type) in existing_income_reports:
+                    logger.info(f"New report income for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
+                    income_report = CompanyIncomeReport(
                         company=company,
                         date_reported=report["fiscalDateEnding"],
                         report_type=db_report_type,
@@ -256,7 +240,96 @@ class TickerData():
                         ebitda=convert(report["ebitda"]),
                         net_income=convert(report["netIncome"]),
                     )
-                    earnings.save()
+                    income_report.save()
+
+    def _update_db_balance(self, company):
+        last_balance_report = CompanyBalanceReport.objects.filter(company=company).order_by("-date_reported").first()
+        
+        existing_balance_reports = list()
+        if not last_balance_report:
+            if not self.balances:
+                self.balances = AlphaVantage.get_balance(self.ticker)
+        else:
+            existing_balance_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyBalanceReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
+        # collect balance statements
+        logger.debug("checking for new balance reports for {self.tcker}")
+        for report_type, db_report_type in (("annualReports", ReportType.Annual), ("quarterlyReports", ReportType.Quarterly)):
+            for report in self.balances[report_type]:
+                #check that there is no report from this date and the same report type
+                if not (report["fiscalDateEnding"], db_report_type) in existing_balance_reports:
+                    logger.info(f"New report balance for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
+                    balance_report = CompanyBalanceReport(
+                        
+                        company = company,
+                        date_reported = report["fiscalDateEnding"],
+                        report_type = db_report_type,
+                        total_assets = convert(report["totalAssets"]),
+                        total_current_assets = convert(report["totalCurrentAssets"]),
+                        cash_and_equivalents_at_carrying_value = convert(report["cashAndCashEquivalentsAtCarryingValue"]),
+                        cash_and_short_term_investments = convert(report["cashAndShortTermInvestments"]),
+                        inventory = convert(report["inventory"]),
+                        current_net_receivables = convert(report["currentNetReceivables"]),
+                        total_non_current_assets = convert(report["totalNonCurrentAssets"]),
+                        property_plant_equipment = convert(report["propertyPlantEquipment"]),
+                        accumulated_depreciation_amortization_ppe = convert(report["accumulatedDepreciationAmortizationPPE"]),
+                        intangible_assets = convert(report["intangibleAssets"]),
+                        intangible_assets_excluding_goodwill = convert(report["intangibleAssetsExcludingGoodwill"]),
+                        goodwill = convert(report["goodwill"]),
+                        investments = convert(report["investments"]),
+                        long_term_investments = convert(report["longTermInvestments"]),
+                        short_term_investments = convert(report["shortTermInvestments"]),
+                        other_current_assets = convert(report["otherCurrentAssets"]),
+                        other_non_current_assets = convert(report["otherNonCurrrentAssets"]),
+                        total_liabilities = convert(report["totalLiabilities"]),
+                        total_current_liabilities = convert(report["totalCurrentLiabilities"]),
+                        current_accounts_payable = convert(report["currentAccountsPayable"]),
+                        deffered_revenue = convert(report["deferredRevenue"]),
+                        current_debt = convert(report["currentDebt"]),
+                        short_term_debt = convert(report["shortTermDebt"]),
+                        total_non_current_liabilities = convert(report["totalNonCurrentLiabilities"]),
+                        capital_lease_obligations = convert(report["capitalLeaseObligations"]),
+                        long_term_debt = convert(report["longTermDebt"]),
+                        current_long_term_debt = convert(report["currentLongTermDebt"]),
+                        long_term_debt_non_current = convert(report["longTermDebtNoncurrent"]),
+                        short_long_term_debt_total = convert(report["shortLongTermDebtTotal"]),
+                        other_current_liabilities = convert(report["otherCurrentLiabilities"]),
+                        other_non_current_liabilities = convert(report["otherNonCurrentLiabilities"]),
+                        total_shareholder_equity = convert(report["totalShareholderEquity"]),
+                        treasury_stock = convert(report["treasuryStock"]),
+                        retained_earnings = convert(report["retainedEarnings"]),
+                        company_stock = convert(report["commonStock"]),
+                        common_stock_shares_outstanding = convert(report["commonStockSharesOutstanding"]),
+                    )
+                    balance_report.save()
+        
+
+    def update_database(self):
+        
+        def convert(val: str):
+            try:
+                return int(val)
+            except ValueError:
+                logger.debug(f"Improper value to convert ({val}). Return '0' instead")
+                return 0
+
+        if not Company.objects.filter(ticker=self.ticker).count():
+            logger.info(f"Add company {self.ticker}")
+            if not self.overview:
+                self.overview = AlphaVantage.get_overview(self.ticker)
+            company = Company(
+                                ticker=self.ticker,
+                                name=self.overview["Name"],
+                                description=self.overview["Description"],
+                                industry=self.overview["Sector"],
+                                sector=self.overview["Industry"] 
+                             )
+            company.save()
+        else:
+            logger.info(f"overview for {self.ticker} already exists")
+            company = Company.objects.filter(ticker=self.ticker).get()
+        # get all reports for the company and check if we have a new one in current report
+        self._update_db_income(company)
+        self._update_db_balance(company)
         
 def api_timeout_manager_test():
     ApiTimeoutManager.set_requests_limiters(5, 12)

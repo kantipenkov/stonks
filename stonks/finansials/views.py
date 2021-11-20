@@ -1,12 +1,15 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics, permissions
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from finansials.serializers import CompanySerializer, CompanyIncomeSerializer
+from finansials.serializers import CompanySerializer, CompanyIncomeReportSerializer, CompanyBalanceReportSerializer
 # from finansials.serializers import UserSerializer, CompanySerializer, CompanyEarningsSerializer, UserRegistrationSerializer
 # from django.contrib.auth.models import User
-from finansials.models import Company, CompanyIncomeStatements
+from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport
+# from stonks.finansials.models import CompanyBalanceReport
 
 # class UserCreate(generics.CreateAPIView):
 #     queryset = User.objects.all()
@@ -23,18 +26,18 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CompanySerializer
 
     @action(detail=True)
-    def earnings(self, request, *args, **kwargs):
+    def income_reports(self, request, *args, **kwargs):
         company = self.get_object()
-        queryset = CompanyIncomeStatements.objects.filter(company=company.ticker)
-        serializer = CompanyIncomeSerializer(queryset, many=True, context={'request':request})
+        queryset = CompanyIncomeReport.objects.filter(company=company)
+        serializer = CompanyIncomeReportSerializer(queryset, many=True, context={'request':request})
         return Response(serializer.data)
 
-    # @action(detail=True)
-    # def balance(self, request, *args, **kwargs):
-    #     company = self.get_object()
-    #     queryset = CompanyBalance.objects.filter(company=company.ticker)
-    #     serializer = CompanyBalanceSerializer(queryset, many=True, context={'request': request})
-    #     return Response(serializer.data)
+    @action(detail=True)
+    def balance_reports(self, request, *args, **kwargs):
+        company = self.get_object()
+        queryset = CompanyBalanceReport.objects.filter(company=company.ticker)
+        serializer = CompanyBalanceReportSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
     # @action(detail=True)
     # def cash_flow(self, request, *args, **kwargs):
@@ -43,18 +46,40 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     #     serializer = CompanyCashFlowSerilaizer(queryset, many=True, context={'request': request})
     #     return Response(serializer.data)
 
-class CompanyIncomeViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = CompanyIncomeStatements.objects.all()
-    serializer_class = CompanyIncomeSerializer
+class CompanyIncomeReportViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CompanyIncomeReport.objects.all()
+    serializer_class = CompanyIncomeReportSerializer
+
     # def list(self, request):
-    #     queryset = CompanyEarnings.objects.all()
-    #     serializer = CompanyEarningsSerializer(queryset, many=True, context={'request':request})
+    #     queryset = CompanyIncomeReport.objects.all()
+    #     serializer = CompanyIncomeReportSerializer(queryset, many=True, context={'request':request})
     #     return Response(serializer.data)
 
-    # def retrieve(self, request, pk=None):
-    #     queryset = CompanyEarnings.objects.filter(copmany=pk)
-    #     serializer = CompanyEarningsSerializer(queryset, many=True, context={'request':request})
-    #     return Response(serializer.data)
+    def retrieve(self, request:Request, pk=None):
+        try:
+            int(pk)
+            queryset = CompanyIncomeReport.objects.all()
+            income_report = get_object_or_404(queryset, pk=pk)
+            serializer = CompanyIncomeReportSerializer(income_report, context={'request': request})
+        except ValueError as e:
+            queryset = CompanyIncomeReport.objects.filter()
+            serializer = CompanyIncomeReportSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+class CompanyBalanceReportViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CompanyBalanceReport.objects.all()
+    serializer_class = CompanyBalanceReportSerializer
+
+    def retrieve(self, request: Request, pk=None):
+        try:
+            int(pk)
+            queryset = CompanyBalanceReport.objects.all()
+            income_report = get_object_or_404(queryset, pk=pk)
+            serializer = CompanyBalanceReportSerializer(income_report, context={'request': request})
+        except ValueError as e:
+            queryset = CompanyBalanceReport.objects.filter()
+            serializer = CompanyBalanceReportSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
 # class CompanyBalanceViewSet(viewsets.ReadOnlyModelViewSet):
 #     queryset = CompanyBalance.objects.all()

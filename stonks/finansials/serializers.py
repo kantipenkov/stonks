@@ -1,7 +1,8 @@
+from django.db.models import fields
 from rest_framework import serializers
 
 # from django.contrib.auth.models import User
-from finansials.models import Company, CompanyIncomeStatements
+from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport
 # from stonks_view.models import Company, CompanyBalance, CompanyCashFlow, CompanyEarnings, WatchList, WatchItem
 
 
@@ -27,20 +28,20 @@ from finansials.models import Company, CompanyIncomeStatements
 #         fields = ['url', 'id', 'username']
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
-    earnings = serializers.HyperlinkedIdentityField(view_name="companyincomestatements-detail")
-    # balance = serializers.HyperlinkedIdentityField(view_name='company-balance')
+    income_reports = serializers.HyperlinkedIdentityField(view_name="companyincomereport-detail")
+    balance_reports = serializers.HyperlinkedIdentityField(view_name='companybalancereport-detail')
     # cash_flow = serializers.HyperlinkedIdentityField(view_name='company-cash-flow')
 
 
     class Meta:
         model = Company
         # fields = ['url', 'name', 'ticker', 'description', 'earnings', 'balance', 'cash_flow']
-        fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'earnings']
+        fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_reports', 'balance_reports']
 
-class CompanyIncomeSerializer(serializers.HyperlinkedModelSerializer):
+class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
     company = serializers.ReadOnlyField(source='company.name')
     class Meta:
-        model = CompanyIncomeStatements
+        model = CompanyIncomeReport
         fields = ['url',
                   'id',
                   'company',
@@ -72,46 +73,52 @@ class CompanyIncomeSerializer(serializers.HyperlinkedModelSerializer):
                   'net_income',
                  ]
 
-# class CompanyBalanceSerializer(serializers.HyperlinkedModelSerializer):
-#     company = serializers.ReadOnlyField(source='company.name')
-#     class Meta:
-#         model = CompanyBalance
-#         fields = [
-#             'url',
-#             'id',
-#             'date_reported',
-#             'account_payables',
-#             'cash',
-#             'cash_and_short_investments',
-#             'deferred_revenue',
-#             'goodwill',
-#             'intangible_assets',
-#             'long_term_investments',
-#             'long_term_debt',
-#             'net_debt',
-#             'net_receivables',
-#             'other_assets',
-#             'other_current_assets',
-#             'other_current_liabilities',
-#             'other_liabilities',
-#             'other_non_current_assets',
-#             'other_non_current_liabilities',
-#             'property_plant_equipment_net',
-#             'retained_earnings',
-#             'short_term_debt',
-#             'short_term_investments',
-#             'tax_assets',
-#             'total_assets',
-#             'total_current_assets',
-#             'total_current_liabilities',
-#             'total_debt',
-#             'total_investments',
-#             'total_liabilities',
-#             'total_non_current_assets',
-#             'total_non_current_liabilities',
-#             'total_stockholders_equity',
-#             'company',
-#         ]
+class CompanyBalanceReportSerializer(serializers.HyperlinkedModelSerializer):
+    company = serializers.ReadOnlyField(source='company.name')
+    class Meta:
+        model =CompanyBalanceReport
+        fields = ['url',
+                  'id',
+                  'company',
+                  'date_reported',
+                  'report_type',
+                  'total_assets',
+                  'total_current_assets',
+                  'cash_and_equivalents_at_carrying_value',
+                  'cash_and_short_term_investments',
+                  'inventory',
+                  'current_net_receivables',
+                  'total_non_current_assets',
+                  'property_plant_equipment',
+                  'accumulated_depreciation_amortization_ppe',
+                  'intangible_assets',
+                  'intangible_assets_excluding_goodwill',
+                  'goodwill',
+                  'investments',
+                  'long_term_investments',
+                  'short_term_investments',
+                  'other_current_assets',
+                  'other_non_current_assets',
+                  'total_liabilities',
+                  'total_current_liabilities',
+                  'current_accounts_payable',
+                  'deffered_revenue',
+                  'current_debt',
+                  'short_term_debt',
+                  'total_non_current_liabilities',
+                  'capital_lease_obligations',
+                  'long_term_debt',
+                  'current_long_term_debt',
+                  'long_term_debt_non_current',
+                  'short_long_term_debt_total',
+                  'other_current_liabilities',
+                  'other_non_current_liabilities',
+                  'total_shareholder_equity',
+                  'treasury_stock',
+                  'retained_earnings',
+                  'company_stock',
+                  'common_stock_shares_outstanding',
+                 ]
 
 # class CompanyCashFlowSerilaizer(serializers.HyperlinkedModelSerializer):
 #     company = serializers.ReadOnlyField(source='company.name')
