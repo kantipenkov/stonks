@@ -52,7 +52,7 @@ class CompanyIncomeReport(models.Model):
 
 
 class CompanyBalanceReport(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, related_name='balance_reports', on_delete=models.CASCADE)
     date_reported = models.DateField()
     report_type = models.CharField(max_length=9, choices=ReportType.choices)
     total_assets = models.BigIntegerField()
