@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 # router.register(r'users', views.UserViewSet)
 router.register(r'companies', views.CompanyViewSet)
-router.register(r'companyincomereport-detail', views.CompanyIncomeReportViewSet, basename="companyincomereport")
+router.register(r'companyincomereport', views.CompanyIncomeReportViewSet, basename="companyincomereport")
 router.register(r'companybalancereport-detail', views.CompanyBalanceReportViewSet, basename="companybalancereport")
 router.register(r'companycashflowreport-detail', views.CompanyCashFlowReportViewSet, basename='companycashflowreport')
 # router.register(r'watch-list', views.WatchListViewSet)

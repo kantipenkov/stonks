@@ -27,14 +27,17 @@ from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport
 #         fields = ['url', 'id', 'username']
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
-    income_reports = serializers.HyperlinkedRelatedField(view_name="companyincomereport-detail", lookup_field='ticker')
-    balance_reports = serializers.HyperlinkedIdentityField(view_name='companybalancereport-detail')
-    cash_flow_reports = serializers.HyperlinkedIdentityField(view_name='companycashflowreport-detail')
+    income_anual_reports = serializers.HyperlinkedIdentityField(view_name="company-income-annual-reports")
+    income_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-income-quarterly-reports")
+    # income_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-income-quarterly-reports")
+    # balance_reports = serializers.HyperlinkedIdentityField(view_name='companybalancereport-detail')
+    # cash_flow_reports = serializers.HyperlinkedIdentityField(view_name='companycashflowreport-detail')
 
     class Meta:
         model = Company
-        # fields = ['url', 'name', 'ticker', 'description', 'earnings', 'balance', 'cash_flow']
-        fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_reports', 'balance_reports', 'cash_flow_reports']
+        fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_anual_reports', 'income_quarterly_reports', 'income_reports']
+        # fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_reports', 'balance_reports', 'cash_flow_reports']
+        # fields = ['url', 'name', 'ticker', 'description', 'industry', 'sector', 'income_reports' ]
 
 class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
     company = serializers.ReadOnlyField(source='company.name')
