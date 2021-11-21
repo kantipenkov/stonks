@@ -31,6 +31,8 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
     income_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-income-quarterly-reports")
     balance_annual_reports = serializers.HyperlinkedIdentityField(view_name="company-balance-annual-reports")
     balance_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-balance-quarterly-reports")
+    cash_flow_annual_reports = serializers.HyperlinkedIdentityField(view_name="company-cash-flow-annual-reports")
+    cash_flow_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-cash-flow-quarterly-reports")
 
     class Meta:
         model = Company
@@ -46,6 +48,9 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
                   'balance_annual_reports',
                   'balance_quarterly_reports',
                   'balance_reports',
+                  'cash_flow_annual_reports',
+                  'cash_flow_quarterly_reports',
+                  'cash_flows_reports',
                  ]
 
 class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):

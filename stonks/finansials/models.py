@@ -96,7 +96,7 @@ class CompanyBalanceReport(models.Model):
         ordering = ['date_reported']
 
 class CompanyCashFlowReport(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, related_name="cash_flows_reports", on_delete=models.CASCADE)
     date_reported = models.DateField()
     report_type = models.CharField(max_length=9, choices=ReportType.choices)
     operating_cash_flow = models.BigIntegerField()

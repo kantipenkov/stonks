@@ -53,12 +53,19 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = CompanyBalanceReportSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
-    # @action(detail=True)
-    # def cash_flow_reports(self, request, *args, **kwargs):
-    #     company = self.get_object()
-    #     queryset = CompanyCashFlowReport.objects.filter(company=company.ticker)
-    #     serializer = CompanyCashFlowReportSerializer(queryset, many=True, context={'request': request})
-    #     return Response(serializer.data)
+    @action(detail=True)
+    def cash_flow_annual_reports(self, request, *args, **kwargs):
+        company = self.get_object()
+        queryset = CompanyCashFlowReport.objects.filter(company=company.ticker).filter(report_type=ReportType.Annual)
+        serializer = CompanyCashFlowReportSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    @action(detail=True)
+    def cash_flow_quarterly_reports(self, request, *args, **kwargs):
+        company = self.get_object()
+        queryset = CompanyCashFlowReport.objects.filter(company=company.ticker).filter(report_type=ReportType.Quarterly)
+        serializer = CompanyCashFlowReportSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
 
 class CompanyIncomeReportViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CompanyIncomeReport.objects.all()
