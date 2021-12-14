@@ -124,4 +124,4 @@ venv.bak/
 .dmypy.json
 dmypy.json
 # database
-/data
+/backend/data
