@@ -1,5 +1,5 @@
 from django.urls import path, include
-from finansials import views
+from financials import views
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()

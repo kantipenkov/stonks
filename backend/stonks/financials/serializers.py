@@ -2,7 +2,7 @@ from django.db.models import fields
 from rest_framework import serializers
 
 # from django.contrib.auth.models import User
-from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport, CompanyCashFlowReport
+from financials.models import Company, CompanyIncomeReport, CompanyBalanceReport, CompanyCashFlowReport
 
 
 # class 
@@ -171,23 +171,3 @@ class CompanyCashFlowReportSerializer(serializers.HyperlinkedModelSerializer):
                   'change_in_cash_and_cash_equivalents',
                   'change_in_exchange_rate',
                  ]
-# class WatchListSerializer(serializers.HyperlinkedModelSerializer):
-#     owner = serializers.ReadOnlyField(source='owner.username')
-#     # owner = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-#     watch_items = serializers.HyperlinkedIdentityField(view_name='watchlist-items')
-    
-#     class Meta:
-#         model = WatchList
-#         fields = ['url', 'id', 'name', 'owner', 'watch_items']
-#         # fields = ['url', 'id', 'name', 'owner']
-
-
-# class WatchItemSerializer(serializers.HyperlinkedModelSerializer):
-#     company = UserSerializer
-#     # company = serializers.ReadOnlyField(source='company.name')
-#     watch_list = WatchListSerializer
-
-#     class Meta:
-#         model = WatchItem
-#         fields = ['url', 'id', 'watch_list', 'company']
-#         # fields = ['url', 'id', 'company']

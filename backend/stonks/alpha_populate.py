@@ -26,7 +26,7 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stonks.settings')
 import django
 django.setup()
-from finansials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport, CompanyCashFlowReport
+from financials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport, CompanyCashFlowReport
 
 
 def convert(val: str):
@@ -417,18 +417,18 @@ def api_timeout_manager_test():
 if __name__ == '__main__':
     api_key = "VLFPX8TAR2XREWC2"
     api = AlphaVantage.api_key = api_key
-    # for ticker in ('NVDA', 'AMD'):
-    ticker = 'INTC'
+    for ticker in ('NVDA', 'AMD'):
+        ticker_data = TickerData(ticker)
+        ticker_data.update_database()
+    # ticker = 'INTC'
 
     # backup_path = Path("backup2.json")
     # with backup_path.open('r') as fh:
     #     ticker_dict = json.load(fh)
-    ticker_data = TickerData(ticker)
     # ticker_data.from_dict(ticker_dict)
     # company = Company.objects.filter(ticker=ticker).get()
     # cd = CompanyData(company=company, date_reported="2021-01-31", report_type=ReportType.Quarterly)
-    import pdb;pdb.set_trace()
-    ticker_data.update_database()
+    # import pdb;pdb.set_trace()
 
     # obj = api.get_all_fundamentals(ticker)
 

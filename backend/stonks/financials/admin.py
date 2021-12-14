@@ -1,5 +1,5 @@
 from django.contrib import admin
-from finansials.models import Company, CompanyIncomeReport, CompanyBalanceReport
+from financials.models import Company, CompanyIncomeReport, CompanyBalanceReport
 
 # Register your models here.
 
