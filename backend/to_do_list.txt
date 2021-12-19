@@ -1,7 +1,13 @@
 1. database
     a. ticker (overview, next earnings date)
-    b. income (annual, monthly)
-    c. balance (annual, monthly)
-    d. cash flows (annual, monthly)
-2. in ticker model implement metricks calculation, check update is needed, 
-3. implement comparizon side by side
+    b. set up a worker to update the base in timely manner
+2. in ticker model implement metricks calculation
+   a. add historical comparisons of price growth and earnings/sales/etc growth to indicate if there is correlation
+3. watchlists app
+    a. just lists of conpanies to compare
+    b. implement custom lists of metricks that should be used in comparison
+4. price notifications app
+   a. implement notofications based on functional levels that can be described by linear functions
+   b. add telegram bot to send notifications
+   c. implement notifications with more complex triggers (intersections with ascillators)
+5. users app
