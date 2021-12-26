@@ -44,13 +44,13 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
                   'sector',
                   'income_anual_reports',
                   'income_quarterly_reports',
-                  'income_reports',
+                #   'income_reports',
                   'balance_annual_reports',
                   'balance_quarterly_reports',
-                  'balance_reports',
+                #   'balance_reports',
                   'cash_flow_annual_reports',
                   'cash_flow_quarterly_reports',
-                  'cash_flows_reports',
+                #   'cash_flows_reports',
                  ]
 
 class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
