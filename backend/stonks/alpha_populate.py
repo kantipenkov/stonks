@@ -42,6 +42,7 @@ class API_FUNCTIONS(Enum):
     CASH_FLOW = "CASH_FLOW"
     EARNINGS = "EARNINGS"
     OVERVIEW = "OVERVIEW"
+    TIME_SERIES_DAILY = "TIME_SERIES_DAILY"
 
 class NoDataException(Exception):
     "Please initialize object with get_all_fundamentals call"
@@ -115,8 +116,12 @@ class AlphaVantage():
         ApiTimeoutManager.check_api_timeout()
 
     @classmethod
-    def compose_url(cls, function, ticker, api_key):
-        return f"https://www.alphavantage.co/query?function={function}&symbol={ticker}&apikey={api_key}"
+    def compose_url(cls, function, ticker, api_key, **kwargs):
+        base_url = f"https://www.alphavantage.co/query?function={function}&symbol={ticker}&apikey={api_key}"
+        if kwargs:
+            for key, value in kwargs.items():
+                base_url += f"&{key}={value}"
+        return base_url
 
     @classmethod
     def get_income(cls, ticker):        
@@ -417,9 +422,12 @@ def api_timeout_manager_test():
 if __name__ == '__main__':
     api_key = "VLFPX8TAR2XREWC2"
     api = AlphaVantage.api_key = api_key
+    ticker = "INTC"
+    import pdb;pdb.set_trace()
     for ticker in ('NVDA', 'AMD'):
         ticker_data = TickerData(ticker)
         ticker_data.update_database()
+    
     # ticker = 'INTC'
 
     # backup_path = Path("backup2.json")
