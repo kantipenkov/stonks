@@ -1,6 +1,7 @@
 1. database
     a. ticker (overview, next earnings date)
-    b. set up a worker to update the base in timely manner
+    b. price series
+    c. set up a worker to update the base in timely manner
 2. in ticker model implement metricks calculation
    a. add historical comparisons of price growth and earnings/sales/etc growth to indicate if there is correlation
 3. watchlists app
