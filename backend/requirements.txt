@@ -1,4 +1,5 @@
 django
 djangorestframework
+numpy
 psycopg2
 requests
