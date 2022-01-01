@@ -18,6 +18,16 @@ class PricePoint(PricePointBase):
     def __repr__(self) -> str:
         return f"PricePoint(date={self.date}, open={self.open}, high={self.high}, low={self.low}, close={self.close}, volume={self.volume})"
 
+    def to_dict(self):
+        return {
+            'date': self.date,
+            'open': self.open,
+            'high': self.high,
+            'low':  self.low,
+            'close': self.close,
+            'volume': self.volume
+        }
+
 
 data_file = Path('series_test.json')
 with data_file.open('r') as fh:
@@ -50,7 +60,7 @@ for before_split, after_split in prices[days_around_ind].reshape(indices.shape[0
     as_pp = PricePoint(*after_split)
     rf = Fraction(bs_pp.close / as_pp.open)
     split_ratio = rf.limit_denominator(2)
-    print(f"Potential split date {bs_pp.date} " \
+    print(f"Potential split date {as_pp.date} " \
           f"ratio {split_ratio.numerator}:{split_ratio.denominator}")
 
 import pdb;pdb.set_trace()

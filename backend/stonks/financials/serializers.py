@@ -2,7 +2,7 @@ from django.db.models import fields
 from rest_framework import serializers
 
 # from django.contrib.auth.models import User
-from financials.models import Company, CompanyIncomeReport, CompanyBalanceReport, CompanyCashFlowReport
+from financials.models import Company, CompanyIncomeReport, CompanyBalanceReport, CompanyCashFlowReport, PricePoint
 
 
 # class 
@@ -27,12 +27,13 @@ from financials.models import Company, CompanyIncomeReport, CompanyBalanceReport
 #         fields = ['url', 'id', 'username']
 
 class CompanySerializer(serializers.HyperlinkedModelSerializer):
-    income_anual_reports = serializers.HyperlinkedIdentityField(view_name="company-income-annual-reports")
+    income_annual_reports = serializers.HyperlinkedIdentityField(view_name="company-income-annual-reports")
     income_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-income-quarterly-reports")
     balance_annual_reports = serializers.HyperlinkedIdentityField(view_name="company-balance-annual-reports")
     balance_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-balance-quarterly-reports")
     cash_flow_annual_reports = serializers.HyperlinkedIdentityField(view_name="company-cash-flow-annual-reports")
     cash_flow_quarterly_reports = serializers.HyperlinkedIdentityField(view_name="company-cash-flow-quarterly-reports")
+    price_history = serializers.HyperlinkedIdentityField(view_name='company-price-history')
 
     class Meta:
         model = Company
@@ -42,15 +43,13 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
                   'description',
                   'industry',
                   'sector',
-                  'income_anual_reports',
+                  'income_annual_reports',
                   'income_quarterly_reports',
-                #   'income_reports',
                   'balance_annual_reports',
                   'balance_quarterly_reports',
-                #   'balance_reports',
                   'cash_flow_annual_reports',
                   'cash_flow_quarterly_reports',
-                #   'cash_flows_reports',
+                  'price_history',
                  ]
 
 class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
@@ -69,7 +68,7 @@ class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
                   'operating_income', 
                   'selling_general_and_administrative', 
                   'rnd', 
-                  'operating_expences', 
+                  'operating_expenses', 
                   'investment_income_net', 
                   'net_interest_income', 
                   'interest_income',
@@ -82,7 +81,7 @@ class CompanyIncomeReportSerializer(serializers.HyperlinkedModelSerializer):
                   'income_tax_expence',
                   'interest_and_debt_expence',
                   'net_income_from_continuing_operations',
-                  'comprehensive_incom_net_of_tax',
+                  'comprehensive_income_net_of_tax',
                   'ebit',
                   'ebitda',
                   'net_income',
@@ -117,7 +116,7 @@ class CompanyBalanceReportSerializer(serializers.HyperlinkedModelSerializer):
                   'total_liabilities',
                   'total_current_liabilities',
                   'current_accounts_payable',
-                  'deffered_revenue',
+                  'deferred_revenue',
                   'current_debt',
                   'short_term_debt',
                   'total_non_current_liabilities',
@@ -160,9 +159,9 @@ class CompanyCashFlowReportSerializer(serializers.HyperlinkedModelSerializer):
                   'proceeds_for_repurchase_of_common_stock',
                   'proceeds_for_repurchase_of_equity',
                   'proceeds_for_repurchase_of_preferred_stock',
-                  'divident_payout',
-                  'divident_payout_common_stock',
-                  'divident_payout_preferred_stock',
+                  'dividend_payout',
+                  'dividend_payout_common_stock',
+                  'dividend_payout_preferred_stock',
                   'proceeds_from_issuance_of_common_stock',
                   'proceeds_from_issuance_of_long_term_debt_and_capital_securities',
                   'proceeds_from_issuance_of_preferred_stock',
@@ -171,3 +170,20 @@ class CompanyCashFlowReportSerializer(serializers.HyperlinkedModelSerializer):
                   'change_in_cash_and_cash_equivalents',
                   'change_in_exchange_rate',
                  ]
+
+
+class PricePointSerializer(serializers.HyperlinkedModelSerializer):
+  company = serializers.ReadOnlyField(source='company.name')
+  class Meta:
+    model = PricePoint
+    fields = ['url',
+              'id',
+              'company',
+              'date',
+              'open',
+              'high',
+              'low',
+              'close',
+              'volume',
+              'split_ratio',
+             ]

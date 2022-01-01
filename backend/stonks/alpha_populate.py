@@ -1,5 +1,5 @@
 from pprint import pprint
-import pdb
+# import pdb
 
 from datetime import datetime
 from enum import Enum
@@ -54,7 +54,7 @@ class ApiTimeoutManager():
     
     _max_requests_per_minute = 5
     _max_requests_per_day = 500
-    _current_operrations_per_day = 0
+    _current_operations_per_day = 0
     _current_operations_per_minute = 0
     _first_operation_timestamp = None
     _first_of_five_operations_timestamp = None
@@ -71,7 +71,7 @@ class ApiTimeoutManager():
 
     @classmethod
     def reset_day_counter(cls):
-        cls._current_operrations_per_day = 1
+        cls._current_operations_per_day = 1
         cls._first_operation_timestamp = time.time()
 
     @classmethod
@@ -79,7 +79,7 @@ class ApiTimeoutManager():
         if not cls._first_operation_timestamp:
             cls._first_operation_timestamp = time.time()
             cls._first_of_five_operations_timestamp = cls._first_operation_timestamp
-        cls._current_operrations_per_day += 1
+        cls._current_operations_per_day += 1
         cls._current_operations_per_minute += 1
         if cls._current_operations_per_minute > cls._max_requests_per_minute:
             diff = time.time() - cls._first_of_five_operations_timestamp
@@ -92,7 +92,7 @@ class ApiTimeoutManager():
             else:
                 cls.reset_minute_counter()
         
-        if cls._current_operrations_per_day > cls._max_requests_per_day:
+        if cls._current_operations_per_day > cls._max_requests_per_day:
             diff =  time.time() - cls._first_operation_timestamp
             day_in_seconds = 24 * 60 * 60
             if diff < day_in_seconds:
@@ -116,8 +116,10 @@ class AlphaVantage():
         ApiTimeoutManager.check_api_timeout()
 
     @classmethod
-    def compose_url(cls, function, ticker, api_key, **kwargs):
-        base_url = f"https://www.alphavantage.co/query?function={function}&symbol={ticker}&apikey={api_key}"
+    def compose_url(cls, api_key, function, ticker=None, **kwargs):
+        base_url = f"https://www.alphavantage.co/query?function={function}&apikey={api_key}"
+        if ticker:
+            base_url += f"&symbol={ticker}"
         if kwargs:
             for key, value in kwargs.items():
                 base_url += f"&{key}={value}"
@@ -126,35 +128,36 @@ class AlphaVantage():
     @classmethod
     def get_income(cls, ticker):        
         logger.info(f"getting income statements for {ticker}")
-        return cls.get_fundamentals(API_FUNCTIONS.INCOME.value, ticker)
+        return cls.request_data(API_FUNCTIONS.INCOME.value, ticker)
 
     @classmethod
     def get_balance(cls, ticker):
         logger.info(f"getting balances for {ticker}")
-        return cls.get_fundamentals(API_FUNCTIONS.BALANCE.value, ticker)
+        return cls.request_data(API_FUNCTIONS.BALANCE.value, ticker)
 
     @classmethod
     def get_cash_flows(cls, ticker):
         logger.info(f"getting cash flows for {ticker}")
-        return cls.get_fundamentals(API_FUNCTIONS.CASH_FLOW.value, ticker)
+        return cls.request_data(API_FUNCTIONS.CASH_FLOW.value, ticker)
 
     @classmethod
     def get_earnings(cls, ticker):
         logger.info(f"getting earnings for {ticker}")
-        return cls.get_fundamentals(API_FUNCTIONS.EARNINGS.value, ticker)
+        return cls.request_data(API_FUNCTIONS.EARNINGS.value, ticker)
 
     @classmethod
     def get_overview(cls, ticker):
         logger.info(f"getting overview for {ticker}")
-        return cls.get_fundamentals(API_FUNCTIONS.OVERVIEW.value, ticker)
+        return cls.request_data(API_FUNCTIONS.OVERVIEW.value, ticker)
 
     @classmethod
-    def get_fundamentals(cls, function, ticker):
+    def request_data(cls, function, ticker, **kwargs):
+        """performs api call with given parameters"""
         cls.check_api_timeout()
-        logger.info(f"request data for {ticker}")
+        logger.info(f"request data for {ticker} function {function}")
         if not cls.api_key:
             raise NoApiKey("please set api key before pulling data from api" )
-        url = cls.compose_url(function, ticker, cls.api_key)
+        url = cls.compose_url(cls.api_key, function, ticker, **kwargs)
         r = requests.get(url)
         data = r.json()
         return data
@@ -169,6 +172,11 @@ class AlphaVantage():
         obj.earnings = cls.get_earnings(ticker)
         obj.overview = cls.get_overview(ticker)
         return obj
+    
+    @classmethod
+    def get_price_series(cls, ticker):
+        logger.info(f"getting price series for {ticker}")
+        price_series = cls.request_data(function=API_FUNCTIONS.TIME_SERIES_DAILY, ticker=ticker, outputsize="full")
 
 
 class TickerData():
@@ -208,13 +216,13 @@ class TickerData():
         update_required = False
         if last_income_report:
             cur_date = datetime.now().date()
-            if (cur_date - last_income_report.date_reported).days > 90:
+            if (cur_date - last_income_report.date_reported).days > 120:
                 update_required = True
                 existing_income_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyIncomeReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
 
         else:
             update_required = True
-
+        
         if update_required:
             logger.debug("checking for new income reports for {self.tcker}")
             if not self.income:
@@ -236,7 +244,7 @@ class TickerData():
                             operating_income=convert(report["operatingIncome"]),
                             selling_general_and_administrative=convert(report["sellingGeneralAndAdministrative"]),
                             rnd=convert(report["researchAndDevelopment"]),
-                            operating_expences=convert(report["operatingExpenses"]),
+                            operating_expenses=convert(report["operatingExpenses"]),
                             investment_income_net=convert(report["investmentIncomeNet"]),
                             net_interest_income=convert(report["netInterestIncome"]),
                             interest_income=convert(report["interestIncome"]),
@@ -249,7 +257,7 @@ class TickerData():
                             income_tax_expence=convert(report["incomeTaxExpense"]),
                             interest_and_debt_expence=convert(report["interestAndDebtExpense"]),
                             net_income_from_continuing_operations=convert(report["netIncomeFromContinuingOperations"]),
-                            comprehensive_incom_net_of_tax=convert(report["comprehensiveIncomeNetOfTax"]),
+                            comprehensive_income_net_of_tax=convert(report["comprehensiveIncomeNetOfTax"]),
                             ebit=convert(report["ebit"]),
                             ebitda=convert(report["ebitda"]),
                             net_income=convert(report["netIncome"]),
@@ -263,7 +271,7 @@ class TickerData():
         update_required = False
         if last_balance_report:
             cur_date = datetime.now().date()
-            if (cur_date - last_balance_report.date_reported).days > 90:
+            if (cur_date - last_balance_report.date_reported).days > 120:
                 update_required = True
                 existing_balance_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyBalanceReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
         else:
@@ -304,7 +312,7 @@ class TickerData():
                             total_liabilities = convert(report["totalLiabilities"]),
                             total_current_liabilities = convert(report["totalCurrentLiabilities"]),
                             current_accounts_payable = convert(report["currentAccountsPayable"]),
-                            deffered_revenue = convert(report["deferredRevenue"]),
+                            deferred_revenue = convert(report["deferredRevenue"]),
                             current_debt = convert(report["currentDebt"]),
                             short_term_debt = convert(report["shortTermDebt"]),
                             total_non_current_liabilities = convert(report["totalNonCurrentLiabilities"]),
@@ -327,16 +335,17 @@ class TickerData():
         last_cash_flow_report = CompanyCashFlowReport.objects.filter(company=company).order_by("-date_reported").first()
         
         existing_cash_flow_reports = list()
-        update_required = True
+        update_required = False
         if last_cash_flow_report:
             cur_date = datetime.now().date()
-            if (cur_date - last_cash_flow_report.date_reported).days > 90:
+            if (cur_date - last_cash_flow_report.date_reported).days > 120:
                 update_required = True
                 existing_cash_flow_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyCashFlowReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
         else:
             update_required = True
+
         if update_required:
-            logger.debug("checking for new cash flow reports for {self.tcker}")
+            logger.debug(f"checking for new cash flow reports for {self.ticker}")
             if not self.cash_flows:
                 self.cash_flows = AlphaVantage.get_cash_flows(self.ticker)
         # collect cash_flow statements
@@ -366,9 +375,9 @@ class TickerData():
                             proceeds_for_repurchase_of_common_stock = convert(report["paymentsForRepurchaseOfCommonStock"]),
                             proceeds_for_repurchase_of_equity = convert(report["paymentsForRepurchaseOfEquity"]),
                             proceeds_for_repurchase_of_preferred_stock = convert(report["paymentsForRepurchaseOfPreferredStock"]),
-                            divident_payout = convert(report["dividendPayout"]),
-                            divident_payout_common_stock = convert(report["dividendPayoutCommonStock"]),
-                            divident_payout_preferred_stock = convert(report["dividendPayoutPreferredStock"]),
+                            dividend_payout = convert(report["dividendPayout"]),
+                            dividend_payout_common_stock = convert(report["dividendPayoutCommonStock"]),
+                            dividend_payout_preferred_stock = convert(report["dividendPayoutPreferredStock"]),
                             proceeds_from_issuance_of_common_stock = convert(report["proceedsFromIssuanceOfCommonStock"]),
                             proceeds_from_issuance_of_long_term_debt_and_capital_securities = convert(report["proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet"]),
                             proceeds_from_issuance_of_preferred_stock = convert(report["proceedsFromIssuanceOfPreferredStock"]),
@@ -381,14 +390,6 @@ class TickerData():
         
 
     def update_database(self):
-        
-        def convert(val: str):
-            try:
-                return int(val)
-            except ValueError:
-                logger.debug(f"Improper value to convert ({val}). Return '0' instead")
-                return 0
-
         if not Company.objects.filter(ticker=self.ticker).count():
             logger.info(f"Add company {self.ticker}")
             if not self.overview:
@@ -423,7 +424,7 @@ if __name__ == '__main__':
     api_key = "VLFPX8TAR2XREWC2"
     api = AlphaVantage.api_key = api_key
     ticker = "INTC"
-    import pdb;pdb.set_trace()
+    # import pdb;pdb.set_trace()
     for ticker in ('NVDA', 'AMD'):
         ticker_data = TickerData(ticker)
         ticker_data.update_database()
@@ -436,7 +437,7 @@ if __name__ == '__main__':
     # ticker_data.from_dict(ticker_dict)
     # company = Company.objects.filter(ticker=ticker).get()
     # cd = CompanyData(company=company, date_reported="2021-01-31", report_type=ReportType.Quarterly)
-    # import pdb;pdb.set_trace()
+    # # import pdb;pdb.set_trace()
 
     # obj = api.get_all_fundamentals(ticker)
 

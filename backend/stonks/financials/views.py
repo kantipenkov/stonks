@@ -5,10 +5,21 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from financials.serializers import CompanySerializer, CompanyIncomeReportSerializer, CompanyBalanceReportSerializer, CompanyCashFlowReportSerializer
+from financials.serializers import (CompanySerializer,
+                                    CompanyIncomeReportSerializer,
+                                    CompanyBalanceReportSerializer,
+                                    CompanyCashFlowReportSerializer,
+                                    PricePointSerializer,
+                                   )
 
 # from django.contrib.auth.models import User
-from financials.models import Company, CompanyIncomeReport, CompanyBalanceReport, CompanyCashFlowReport, ReportType
+from financials.models import (Company,
+                               CompanyIncomeReport,
+                               CompanyBalanceReport,
+                               CompanyCashFlowReport,
+                               ReportType,
+                               PricePoint,
+                              )
 
 # class UserCreate(generics.CreateAPIView):
 #     queryset = User.objects.all()
@@ -58,11 +69,19 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = CompanyCashFlowReport.objects.filter(company=company.ticker).filter(report_type=ReportType.Annual)
         serializer = CompanyCashFlowReportSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
+    
     @action(detail=True)
     def cash_flow_quarterly_reports(self, request, *args, **kwargs):
         company = self.get_object()
         queryset = CompanyCashFlowReport.objects.filter(company=company.ticker).filter(report_type=ReportType.Quarterly)
         serializer = CompanyCashFlowReportSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def price_history(self, request, *args, **kwargs):
+        company = self.get_object()
+        queryset = PricePoint.objects.filter(company=company.ticker)
+        serializer = PricePointSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -80,3 +99,7 @@ class CompanyCashFlowReportViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CompanyCashFlowReport.objects.all()
     serializer_class = CompanyCashFlowReportSerializer
 
+
+class PricePointViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PricePoint.objects.all()
+    serializer_class = PricePointSerializer

@@ -8,6 +8,7 @@ router.register(r'companies', views.CompanyViewSet)
 router.register(r'companyincomereport', views.CompanyIncomeReportViewSet, basename="companyincomereport")
 router.register(r'companybalancereport', views.CompanyBalanceReportViewSet, basename="companybalancereport")
 router.register(r'companycashflowreport', views.CompanyCashFlowReportViewSet, basename='companycashflowreport')
+router.register(r'pricepoint', views.PricePointViewSet, basename='pricepoint')
 # router.register(r'watch-list', views.WatchListViewSet)
 # router.register(r'watch-items', views.WatchItemsViewSet)
 from pprint import pprint
