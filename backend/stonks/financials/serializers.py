@@ -43,6 +43,8 @@ class CompanySerializer(serializers.HyperlinkedModelSerializer):
                   'description',
                   'industry',
                   'sector',
+                  'next_report_date',
+                  'estimated_eps',
                   'income_annual_reports',
                   'income_quarterly_reports',
                   'balance_annual_reports',
