@@ -1,14 +1,16 @@
 from pprint import pprint
 
+
 from datetime import datetime
 import numpy as np
 from typing import Optional
 
-from utils.alpha_vantage import AlphaVantage
 
 import logging
 logger = logging.getLogger('root')
 
+
+from utils.alpha_vantage import AlphaVantage
 from financials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport, CompanyCashFlowReport
 
 
@@ -23,40 +25,51 @@ def convert(val: str):
         return 0
 
 def update_earnings_dates(foresight_period=6, ticker: Optional[str]=None):
+    update_required = False
+    now = datetime.now().date()
     if ticker:
         ticker = ticker.upper()
-    data = AlphaVantage.get_earnings_calendar(foresight_period, ticker)
-    upcoming_earnings = np.array(','.join(data.split('\r\n')).split(',')[:-1]).reshape(-1, 6)
-    # cut of headings and unused data
-    upcoming_earnings = upcoming_earnings[1:, (0, 2, 4)]
-    if ticker:
         company = Company.objects.filter(ticker=ticker).get()
-        dates = np.stack(np.vectorize(datetime.strptime)(upcoming_earnings[:, 1], "%Y-%m-%d"))
-        dates = np.stack(np.vectorize(datetime.timestamp)(dates))
-        earnings_date = upcoming_earnings[np.argmin(dates), 1]
-        estimated_eps = upcoming_earnings[np.argmin(dates), 2]
-        company.next_report_date = earnings_date
-        if estimated_eps:
-            logger.info(f"Set estimated EPS for {company.ticker} to {estimated_eps}")
-            company.estimated_eps = float(estimated_eps)
-        logger.info(f"Set new report date for {company.ticker} as {earnings_date}")
-        company.save()
-
+        if now > company.next_report_date:
+            update_required = True
     else:
         for company in Company.objects.all():
-            # get only records for current company
-            earnings = upcoming_earnings[np.where(upcoming_earnings[:, :1] == company.ticker)[0], :]
-            if len(earnings) > 0:
-                dates = np.stack(np.vectorize(datetime.strptime)(earnings[:, 1], "%Y-%m-%d"))
-                dates = np.stack(np.vectorize(datetime.timestamp)(dates))
-                earnings_date = earnings[np.argmin(dates), 1]
-                estimated_eps = earnings[np.argmin(dates), 2]
-                company.next_report_date = earnings_date
-                if estimated_eps:
-                    logger.info(f"Set estimated EPS for {company.ticker} to {estimated_eps}")
-                    company.estimated_eps = float(estimated_eps)
-                logger.info(f"Set new report date for {company.ticker} as {earnings_date}")
-                company.save()
+            if now > company.next_report_date:
+                update_required = True
+                break
+    if update_required:
+        data = AlphaVantage.get_earnings_calendar(foresight_period, ticker)
+        upcoming_earnings = np.array(','.join(data.split('\r\n')).split(',')[:-1]).reshape(-1, 6)
+        # cut of headings and unused data
+        upcoming_earnings = upcoming_earnings[1:, (0, 2, 4)]
+        if ticker:
+            company = Company.objects.filter(ticker=ticker).get()
+            dates = np.stack(np.vectorize(datetime.strptime)(upcoming_earnings[:, 1], "%Y-%m-%d"))
+            dates = np.stack(np.vectorize(datetime.timestamp)(dates))
+            earnings_date = upcoming_earnings[np.argmin(dates), 1]
+            estimated_eps = upcoming_earnings[np.argmin(dates), 2]
+            company.next_report_date = earnings_date
+            if estimated_eps:
+                logger.info(f"Set estimated EPS for {company.ticker} to {estimated_eps}")
+                company.estimated_eps = float(estimated_eps)
+            logger.info(f"Set new report date for {company.ticker} as {earnings_date}")
+            company.save()
+
+        else:
+            for company in Company.objects.all():
+                # get only records for current company
+                earnings = upcoming_earnings[np.where(upcoming_earnings[:, :1] == company.ticker)[0], :]
+                if len(earnings) > 0:
+                    dates = np.stack(np.vectorize(datetime.strptime)(earnings[:, 1], "%Y-%m-%d"))
+                    dates = np.stack(np.vectorize(datetime.timestamp)(dates))
+                    earnings_date = earnings[np.argmin(dates), 1]
+                    estimated_eps = earnings[np.argmin(dates), 2]
+                    company.next_report_date = earnings_date
+                    if estimated_eps:
+                        logger.info(f"Set estimated EPS for {company.ticker} to {estimated_eps}")
+                        company.estimated_eps = float(estimated_eps)
+                    logger.info(f"Set new report date for {company.ticker} as {earnings_date}")
+                    company.save()
 
 
 class TickerData():
