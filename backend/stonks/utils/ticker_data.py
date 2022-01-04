@@ -11,11 +11,16 @@ logger = logging.getLogger('root')
 
 
 from utils.alpha_vantage import AlphaVantage
-from financials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport, CompanyCashFlowReport
+from utils.price_time_series import process_prices, PricePointTuple
+from financials.models import Company, CompanyIncomeReport, ReportType, CompanyBalanceReport, CompanyCashFlowReport, PricePoint
 
 
 class NoDataException(Exception):
-    "Please initialize object with get_all_fundamentals call"
+    """Please initialize object with get_all_fundamentals call"""
+
+
+class NoTickerException(Exception):
+    """Ticker field hasn't been initialized"""
 
 def convert(val: str):
     try:
@@ -71,6 +76,13 @@ def update_earnings_dates(foresight_period=6, ticker: Optional[str]=None):
                     logger.info(f"Set new report date for {company.ticker} as {earnings_date}")
                     company.save()
 
+def check_ticker(f):
+    def wrapper(*args):
+        if not args[0].ticker:
+            raise NoTickerException(f"please initialize ticker filed of the class before calling {f.__name__}")
+        return f(*args)
+    return wrapper
+
 
 class TickerData():
     ticker = None
@@ -79,6 +91,7 @@ class TickerData():
     cash_flows = None
     earnings = None
     overview = None
+    price_series = None
 
     def __init__(self, ticker:str):
         self.ticker = ticker.upper()
@@ -280,8 +293,44 @@ class TickerData():
                             change_in_exchange_rate = convert(report["changeInExchangeRate"]),
                         )
                         cash_flow_report.save()
-        
 
+    def _update_time_series(self, company):
+        update_required = False
+        last_price_point = PricePoint.objects.filter(company=company).order_by('-date').first()
+        if not last_price_point:
+            update_required = True
+        else:
+            if datetime.now().date() > last_price_point.date:
+                update_required = True
+        if update_required:
+            logger.info(f"Update prices history for {company.ticker}")
+            existing_price_points = list(map(lambda x: datetime.combine(x[0], datetime.min.time()).timestamp(), PricePoint.objects.filter(company=company).values_list('date') ))
+            price_series = AlphaVantage.get_price_series(self.ticker)
+            price_series, splits = process_prices(price_series)
+            # import pdb;pdb.set_trace()
+            # get existing values
+            for elem in price_series:
+                day_data = PricePointTuple(*elem)
+                if day_data.timestamp not in existing_price_points:
+                    kwargs = {
+                        "company": company,
+                        "date": day_data.date,
+                        "open": float(day_data.open),
+                        "high": float(day_data.high),
+                        "low": float(day_data.low),
+                        "close": float(day_data.close),
+                        "volume": float(day_data.volume),
+                    }
+                    if day_data.timestamp in splits:
+                        import pdb;pdb.set_trace()
+                        id = np.where(splits == day_data.timestamp)[0][0]
+                        split = splits[id, 1]
+                        kwargs["split_ratio"] = f"{split.numerator}:{split.denominator}"
+                    logger.info(f"Add Price point for {self.ticker} date: {day_data.date}")
+                    price_point = PricePoint(**kwargs)
+                    price_point.save()
+
+    @check_ticker
     def update_db_fundamentals(self):
         if not Company.objects.filter(ticker=self.ticker).count():
             logger.info(f"Add company {self.ticker}")
@@ -302,7 +351,9 @@ class TickerData():
         self._update_db_income(company)
         self._update_db_balance(company)
         self._update_db_cash_flows(company)
-        
+        self. _update_time_series(company)
+
+    @check_ticker
     def get_all_fundamentals(self):
         logger.info(f"getting all fundamentals for {self.ticker}")
         self.income = AlphaVantage.get_income(self.ticker)
@@ -310,3 +361,4 @@ class TickerData():
         self.cash_flows = AlphaVantage.get_cash_flows(self.ticker)
         self.earnings = AlphaVantage.get_earnings(self.ticker)
         self.overview = AlphaVantage.get_overview(self.ticker)
+        self.price_series = AlphaVantage.get_price_series(self.ticker)

@@ -8,6 +8,8 @@ from datetime import datetime
 from collections import namedtuple
 PricePointBase = namedtuple('PricePointBase', ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
+SplitPoint = namedtuple('SplitPoint', ['timestamp', 'split_ratio'])
+
 
 class PricePoint(PricePointBase):
 
@@ -28,6 +30,9 @@ class PricePoint(PricePointBase):
             'volume': self.volume
         }
 
+
+def apply_split(num, split_ratio: Fraction):
+    return num / split_ratio.numerator * split_ratio.denominator
 
 data_file = Path('series_test.json')
 with data_file.open('r') as fh:
@@ -55,6 +60,7 @@ dates = np.stack(np.vectorize(datetime.strftime)(timestamps, "%Y-%m-%d"))
 days_around_ind = np.hstack((indices, indices + 1))
 days_around_ind.sort()
 # get prices
+splits = list()
 for before_split, after_split in prices[days_around_ind].reshape(indices.shape[0], -1, 6):
     bs_pp = PricePoint(*before_split)
     as_pp = PricePoint(*after_split)
@@ -62,7 +68,13 @@ for before_split, after_split in prices[days_around_ind].reshape(indices.shape[0
     split_ratio = rf.limit_denominator(2)
     print(f"Potential split date {as_pp.date} " \
           f"ratio {split_ratio.numerator}:{split_ratio.denominator}")
+    splits.append(SplitPoint(as_pp.timestamp, split_ratio))
 
+for split_point in splits[::-1]:
+    inds = np.where(prices[:,0] < split_point.timestamp)[0]
+    prices[inds,1:] = np.stack(np.vectorize(apply_split)(prices[inds,1:], split_point.split_ratio))
+
+aa = list(map(tuple, splits))
 import pdb;pdb.set_trace()
 
 # calculate splits ratios using fractions module

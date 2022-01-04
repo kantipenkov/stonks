@@ -139,7 +139,7 @@ class PricePoint(models.Model):
     low = models.FloatField()
     close = models.FloatField()
     volume = models.FloatField()
-    split_ratio = models.DecimalField(max_digits=5, decimal_places=3, blank=True)
+    split_ratio = models.CharField(max_length=10, blank=True)
 
     class Meta:
         ordering = ['date']

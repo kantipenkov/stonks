@@ -142,6 +142,7 @@ class AlphaVantage():
         logger.debug(f"request to {url}")
         if output_format == "json":
             r = requests.get(url)
+            # import pdb;pdb.set_trace()
             return r.json()
         else:
             with requests.Session() as s:
@@ -156,7 +157,7 @@ class AlphaVantage():
     @classmethod
     def get_price_series(cls, ticker):
         logger.info(f"getting price series for {ticker}")
-        price_series = cls.request_data(function=API_FUNCTIONS.TIME_SERIES_DAILY.value, ticker=ticker, outputsize="full")
+        return cls.request_data(function=API_FUNCTIONS.TIME_SERIES_DAILY.value, ticker=ticker, outputsize="full")
 
     @classmethod
     def get_earnings_calendar(cls, months_num=3, ticker=None):
