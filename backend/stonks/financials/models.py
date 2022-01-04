@@ -141,3 +141,6 @@ class PricePoint(models.Model):
     volume = models.FloatField()
     split_ratio = models.DecimalField(max_digits=5, decimal_places=3, blank=True)
 
+    class Meta:
+        ordering = ['date']
+
