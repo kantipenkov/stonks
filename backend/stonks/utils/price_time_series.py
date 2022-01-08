@@ -58,26 +58,29 @@ def process_prices(json_data):
 
     cond2 = np.where(abs(ratio) > 0.45)
     indices = np.unique(cond2[0])
-    timestamps = prices[1:, :1][indices]
-    timestamps = np.stack(np.vectorize(datetime.fromtimestamp)(timestamps))
-    dates = np.stack(np.vectorize(datetime.strftime)(timestamps, "%Y-%m-%d"))
-    # add calculation of split ratio
-    days_around_ind = np.hstack((indices, indices + 1))
-    days_around_ind.sort()
-    # get prices
-    splits = list()
-    for before_split, after_split in prices[days_around_ind].reshape(indices.shape[0], -1, 6):
-        bs_pp = PricePointTuple(*before_split)
-        as_pp = PricePointTuple(*after_split)
-        rf = Fraction(bs_pp.close / as_pp.open)
-        split_ratio = rf.limit_denominator(2)
-        logger.info(f"Potential split date {as_pp.date} " \
-            f"ratio {split_ratio.numerator}:{split_ratio.denominator}")
-        splits.append(SplitPoint(as_pp.timestamp, split_ratio))
+    if len(indices) > 0:
+        timestamps = prices[1:, :1][indices]
+        timestamps = np.stack(np.vectorize(datetime.fromtimestamp)(timestamps))
+        dates = np.stack(np.vectorize(datetime.strftime)(timestamps, "%Y-%m-%d"))
+        # add calculation of split ratio
+        days_around_ind = np.hstack((indices, indices + 1))
+        days_around_ind.sort()
+        # get prices
+        splits = list()
+        for before_split, after_split in prices[days_around_ind].reshape(indices.shape[0], -1, 6):
+            bs_pp = PricePointTuple(*before_split)
+            as_pp = PricePointTuple(*after_split)
+            rf = Fraction(bs_pp.close / as_pp.open)
+            split_ratio = rf.limit_denominator(2)
+            logger.info(f"Potential split date {as_pp.date} " \
+                f"ratio {split_ratio.numerator}:{split_ratio.denominator}")
+            splits.append(SplitPoint(as_pp.timestamp, split_ratio))
 
-    for split_point in splits[::-1]:
-        inds = np.where(prices[:,0] < split_point.timestamp)[0]
-        prices[inds,1:] = np.stack(np.vectorize(apply_split)(prices[inds,1:], split_point.split_ratio))
+        for split_point in splits[::-1]:
+            inds = np.where(prices[:,0] < split_point.timestamp)[0]
+            prices[inds,1:] = np.stack(np.vectorize(apply_split)(prices[inds,1:], split_point.split_ratio))
+    else:
+        splits = list()
     
     return prices, np.array(splits)
 

@@ -22,6 +22,11 @@ class NoDataException(Exception):
 class NoTickerException(Exception):
     """Ticker field hasn't been initialized"""
 
+
+class TickerNotFound(Exception):
+    """Failed to get correct data from API"""
+
+
 def convert(val: str):
     try:
         return int(val)
@@ -300,14 +305,13 @@ class TickerData():
         if not last_price_point:
             update_required = True
         else:
-            if datetime.now().date() > last_price_point.date:
+            if (datetime.now().date() - last_price_point.date).days > 7:
                 update_required = True
         if update_required:
             logger.info(f"Update prices history for {company.ticker}")
             existing_price_points = list(map(lambda x: datetime.combine(x[0], datetime.min.time()).timestamp(), PricePoint.objects.filter(company=company).values_list('date') ))
             price_series = AlphaVantage.get_price_series(self.ticker)
             price_series, splits = process_prices(price_series)
-            # import pdb;pdb.set_trace()
             # get existing values
             for elem in price_series:
                 day_data = PricePointTuple(*elem)
@@ -322,7 +326,6 @@ class TickerData():
                         "volume": float(day_data.volume),
                     }
                     if day_data.timestamp in splits:
-                        import pdb;pdb.set_trace()
                         id = np.where(splits == day_data.timestamp)[0][0]
                         split = splits[id, 1]
                         kwargs["split_ratio"] = f"{split.numerator}:{split.denominator}"
@@ -336,6 +339,8 @@ class TickerData():
             logger.info(f"Add company {self.ticker}")
             if not self.overview:
                 self.overview = AlphaVantage.get_overview(self.ticker)
+                if not self.overview:
+                    raise TickerNotFound(f"failed to get data for {self.ticker} from API. Try searching for correct ticker")
             company = Company(
                                 ticker=self.ticker,
                                 name=self.overview["Name"],

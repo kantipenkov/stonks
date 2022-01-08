@@ -1,7 +1,10 @@
+from datetime import datetime
 from pprint import pprint
 # import pdb
 
+import json
 from enum import Enum
+import os
 import requests
 import time
 
@@ -9,13 +12,16 @@ import logging
 logger = logging.getLogger('root')
 
 
-class AlphaVantageApiException:
+class AlphaVantageApiException(Exception):
     """incorrect API arguments"""
 
 
 class NoApiKey(AlphaVantageApiException):
     "Please set api key to pull some data from api"
 
+
+class DailyReuestsAmountExceded(AlphaVantageApiException):
+    """No more API requests available this day"""
 
 class API_FUNCTIONS(Enum):
     INCOME = "INCOME_STATEMENT"
@@ -29,15 +35,17 @@ class API_FUNCTIONS(Enum):
 
 class ApiTimeoutManager():
     
+    _config_file = "alpha_vantage_config.txt"
+    _time_str_format = "%Y-%m-%d %H:%M:%S"
     _max_requests_per_minute = 5
-    _max_requests_per_day = 500
+    _max_requests_per_day = 350
     _current_operations_per_day = 0
     _current_operations_per_minute = 0
     _first_operation_timestamp = None
     _first_of_five_operations_timestamp = None
 
     @classmethod
-    def set_requests_limiters(cls, minute: int, day: int):
+    def _set_requests_limiters(cls, minute: int, day: int):
         cls._max_requests_per_minute = minute
         cls._max_requests_per_day = day
 
@@ -54,10 +62,31 @@ class ApiTimeoutManager():
     @classmethod
     def check_api_timeout(cls):
         if not cls._first_operation_timestamp:
-            cls._first_operation_timestamp = time.time()
-            cls._first_of_five_operations_timestamp = cls._first_operation_timestamp
+            if os.path.exists(cls._config_file):
+                with open(cls._config_file, 'r') as fh:
+                    config = json.load(fh)
+                cls._max_requests_per_minute = config["_max_requests_per_minute"]
+                cls._max_requests_per_day = config["_max_requests_per_day"]
+                cls._current_operations_per_day = config["_current_operations_per_day"]
+                cls._current_operations_per_minute = config["_current_operations_per_minute"]
+                cls._first_operation_timestamp = datetime.strptime(config["_first_operation_timestamp"], cls._time_str_format).timestamp()
+                cls._first_of_five_operations_timestamp = datetime.strptime(config["_first_of_five_operations_timestamp"], cls._time_str_format).timestamp()
+            else:
+                cls._first_operation_timestamp = time.time()
+                cls._first_of_five_operations_timestamp = cls._first_operation_timestamp
+        log_data = {
+                    "_max_requests_per_minute" : cls._max_requests_per_minute,
+                    "_max_requests_per_day" : cls._max_requests_per_day,
+                    "_current_operations_per_day" : cls._current_operations_per_day,
+                    "_current_operations_per_minute" : cls._current_operations_per_minute,
+                    "_first_operation_timestamp" : datetime.fromtimestamp(cls._first_operation_timestamp).strftime(cls._time_str_format),
+                    "_first_of_five_operations_timestamp" : datetime.fromtimestamp(cls._first_of_five_operations_timestamp).strftime(cls._time_str_format),
+                    # "limit_exceeded_at": datetime.now().strftime(cls._time_str_format)
+                }
         cls._current_operations_per_day += 1
         cls._current_operations_per_minute += 1
+        with open(cls._config_file, "w") as fh:
+            json.dump(log_data, fh, indent=4)
         if cls._current_operations_per_minute > cls._max_requests_per_minute:
             diff = time.time() - cls._first_of_five_operations_timestamp
             minute_in_seconds = 60
@@ -75,11 +104,10 @@ class ApiTimeoutManager():
             if diff < day_in_seconds:
                 break_time = day_in_seconds - diff + 60 # just to be sure
                 logger.info(f"Exceed maximum requests per day. Will wait for {time.strftime('%H hours %M minutes and %S seconds', time.gmtime(break_time))} seconds")
-                time.sleep(break_time)
-                cls.reset_day_counter
+                raise DailyReuestsAmountExceded("No more API requests available this day")
             else:
                 cls.reset_day_counter()
-                time.str
+                # time.str
 
 
 class AlphaVantage():
@@ -186,10 +214,26 @@ class AlphaVantage():
 
 
 def api_timeout_manager_test():
-    ApiTimeoutManager.set_requests_limiters(5, 12)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    # create formatter
+
+    # add formatter to ch
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger('root')
+    logger.setLevel(logging.DEBUG)
+    # add ch to logger
+    logger.addHandler(handler)
+
+    ApiTimeoutManager._set_requests_limiters(5, 12)
     start_time = time.time()
     
     for i in range(1,15):
-        logger.debug(f"attempt {i}, time from start {time.time() - start_time} seconds")
+        logger.info(f"attempt {i}, time from start {time.time() - start_time} seconds")
         ApiTimeoutManager.check_api_timeout()
         time.sleep(1)
+
+if __name__ == "__main__":
+    api_timeout_manager_test()
