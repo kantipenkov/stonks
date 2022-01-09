@@ -125,3 +125,4 @@ venv.bak/
 dmypy.json
 # database
 /backend/data
+*.sql
