@@ -44,7 +44,7 @@ if __name__ == '__main__':
             ticker_data = TickerData(ticker)
             try:
                 ticker_data.update_db_fundamentals()
-            except (TickerNotFound, Exception) as e:
+            except (TickerNotFound, KeyError) as e:
                 logger.warning(f"Cant get data for {ticker}")
                 log_failed_ticker(f"{ticker}: {str(e)}")
                 # raise

@@ -194,14 +194,14 @@ class AlphaVantage():
         if output_format == "json":
             r = requests.get(url)
             json_ret = r.json()
-            if 'Note' in json_ret:
+            if 'Note' in json_ret or 'Information' in json_ret:
                 logger.warning("it may happen that we exceded daily amount of API calls. Wailting for a minute and retry")
                 time.sleep(90) # 60 + 30 to be sure
                 cls.check_api_timeout()
                 logger.info(f"Retry requesting data for {ticker} function {function}")
                 r = requests.get(url)
                 json_ret = r.json()
-                if 'Note' in json_ret:
+                if 'Note' in json_ret or 'Information' in json_ret:
                     ApiTimeoutManager.set_daily_api_timeout_excedded()
             return json_ret
         else:
@@ -232,7 +232,7 @@ class AlphaVantage():
                     cur_diff = diff
                     cur_val = i
             months_num = cur_val
-        msg = "getting earnings calendar for next {month_num}"
+        msg = f"getting earnings calendar for next {months_num}"
         if ticker:
             msg += f" for {ticker}"
         logger.info(msg)
