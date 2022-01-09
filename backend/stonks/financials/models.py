@@ -10,12 +10,15 @@ class ReportType(models.TextChoices):
 
 class Company(models.Model):
     ticker = models.CharField(max_length=10, primary_key=True)
+    tinkoff_ticker = models.CharField(max_length=10, blank=True)
     name = models.CharField(max_length=100)
     description = models.TextField()
     industry = models.CharField(max_length=100)
     sector = models.CharField(max_length=100)
     next_report_date = models.DateField(blank=True, default="2000-01-01")
     estimated_eps = models.FloatField(blank=True, default=0)
+    currency = models.CharField(max_length=20)
+    country = models.CharField(max_length=50)
 
 
 

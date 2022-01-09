@@ -12,7 +12,7 @@ handler.setLevel(logging.DEBUG)
 handler.setFormatter(formatter)
 
 logger = logging.getLogger('root')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 # add ch to logger
 logger.addHandler(handler)
 
@@ -25,33 +25,29 @@ django.setup()
 from utils.alpha_vantage import AlphaVantage, DailyReuestsAmountExceded
 from utils.ticker_data import TickerData, TickerNotFound, update_earnings_dates
 
+def log_failed_ticker(msg):
+    with open("failed_tickers.json", "a") as fh:
+        fh.write(msg + "\n")
 
 if __name__ == '__main__':
-    tickers = ('NVDA', 'AMD', 'INTC', 'ILMN')
+    api_key = "VLFPX8TAR2XREWC2"
+    AlphaVantage.api_key = api_key
+    tickers = ('NVDA', 'AMD', 'INTC', 'ILMN', 'MDMG')
     if len(sys.argv) > 1:
         tickers_file = sys.argv[1]
         if os.path.exists(tickers_file):
             with open(tickers_file, 'r') as fh:
                 tickers = json.load(fh)
-    # import pdb;pdb.set_trace()
-    api_key = "VLFPX8TAR2XREWC2"
-    api = AlphaVantage.api_key = api_key
-    # ticker = "INTC"
     logger.debug('ap')
-    # import pdb;pdb.set_trace()
-    failed_tickers = list()
     try:
         for ticker in tickers:
             ticker_data = TickerData(ticker)
             try:
                 ticker_data.update_db_fundamentals()
-            except TickerNotFound as e:
-                failed_tickers.append(f"{ticker}: {str(e)}")
+            except (TickerNotFound, Exception) as e:
+                logger.warning(f"Cant get data for {ticker}")
+                log_failed_ticker(f"{ticker}: {str(e)}")
+                # raise
     except DailyReuestsAmountExceded as e:
         logger.warning("Daily limit of requests exceded")
-    with open("failed_tickers.json", "w") as fh:
-        fh.writelines(failed_tickers)
     update_earnings_dates(6)
-    # data = AlphaVantage.get_earnings_calendar(100, 'AMD') 
-    # import numpy as np
-    # arr = np.array(','.join(data.split('\r\n')).split(',')[:-1]).reshape(-1, 6)

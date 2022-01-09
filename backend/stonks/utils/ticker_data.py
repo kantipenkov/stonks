@@ -143,7 +143,7 @@ class TickerData():
                 for report in self.income[report_type]:
                     #check that there is no report from this date and the same report type
                     if not (report["fiscalDateEnding"], db_report_type) in existing_income_reports:
-                        logger.info(f"New report income for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
+                        logger.debug(f"New report income for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
                         income_report = CompanyIncomeReport(
                             company=company,
                             date_reported=report["fiscalDateEnding"],
@@ -197,7 +197,7 @@ class TickerData():
                 for report in self.balances[report_type]:
                     #check that there is no report from this date and the same report type
                     if not (report["fiscalDateEnding"], db_report_type) in existing_balance_reports:
-                        logger.info(f"New report balance for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
+                        logger.debug(f"New report balance for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
                         balance_report = CompanyBalanceReport(
                             
                             company = company,
@@ -264,7 +264,7 @@ class TickerData():
                 for report in self.cash_flows[report_type]:
                     #check that there is no report from this date and the same report type
                     if not (report["fiscalDateEnding"], db_report_type) in existing_cash_flow_reports:
-                        logger.info(f"New report cash flow for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
+                        logger.debug(f"New report cash flow for ticker {self.ticker}. Date of report: {report['fiscalDateEnding']}, report type: {db_report_type}")
                         cash_flow_report = CompanyCashFlowReport(
                             
                             company = company,
@@ -305,7 +305,7 @@ class TickerData():
         if not last_price_point:
             update_required = True
         else:
-            if (datetime.now().date() - last_price_point.date).days > 7:
+            if (datetime.now().date() - last_price_point.date).days > 20:
                 update_required = True
         if update_required:
             logger.info(f"Update prices history for {company.ticker}")
@@ -329,7 +329,7 @@ class TickerData():
                         id = np.where(splits == day_data.timestamp)[0][0]
                         split = splits[id, 1]
                         kwargs["split_ratio"] = f"{split.numerator}:{split.denominator}"
-                    logger.info(f"Add Price point for {self.ticker} date: {day_data.date}")
+                    logger.debug(f"Add Price point for {self.ticker} date: {day_data.date}")
                     price_point = PricePoint(**kwargs)
                     price_point.save()
 
@@ -337,16 +337,31 @@ class TickerData():
     def update_db_fundamentals(self):
         if not Company.objects.filter(ticker=self.ticker).count():
             logger.info(f"Add company {self.ticker}")
+            tinkoff_ticker = self.ticker
             if not self.overview:
                 self.overview = AlphaVantage.get_overview(self.ticker)
                 if not self.overview:
-                    raise TickerNotFound(f"failed to get data for {self.ticker} from API. Try searching for correct ticker")
+                    # use search node to find proper name of the ticker
+                    search_results = AlphaVantage.search_tickers(self.ticker)
+                    if len(search_results['bestMatches']) == 0:
+                        raise TickerNotFound(f"failed to get data for {self.ticker} from API.")
+                    if len(search_results['bestMatches']) > 1:
+                        raise TickerNotFound(f"failed to get data for {self.ticker} from API. Search found too many results. Manual input required")
+                    self.ticker = search_results['bestMatches'][0]['1. symbol']
+                    self.overview = AlphaVantage.get_overview(self.ticker)
+                    if not self.overview:
+                        raise TickerNotFound(f"Cant feth data for {self.ticker}")
+                    
+            # import pdb;pdb.set_trace()
             company = Company(
                                 ticker=self.ticker,
+                                tinkoff_ticker = tinkoff_ticker,
                                 name=self.overview["Name"],
                                 description=self.overview["Description"],
                                 industry=self.overview["Sector"],
-                                sector=self.overview["Industry"] 
+                                sector=self.overview["Industry"],
+                                currency=self.overview["Currency"],
+                                country=self.overview["Country"],
                              )
             company.save()
         else:

@@ -31,6 +31,7 @@ class API_FUNCTIONS(Enum):
     OVERVIEW = "OVERVIEW"
     TIME_SERIES_DAILY = "TIME_SERIES_DAILY"
     EARNINGS_CALENDAR = "EARNINGS_CALENDAR"
+    SYMBOL_SEARCH = "SYMBOL_SEARCH"
 
 
 class ApiTimeoutManager():
@@ -60,6 +61,27 @@ class ApiTimeoutManager():
         cls._first_operation_timestamp = time.time()
 
     @classmethod
+    def save_status(cls):
+        log_data = {
+                    "_max_requests_per_minute" : cls._max_requests_per_minute,
+                    "_max_requests_per_day" : cls._max_requests_per_day,
+                    "_current_operations_per_day" : cls._current_operations_per_day,
+                    "_current_operations_per_minute" : cls._current_operations_per_minute,
+                    "_first_operation_timestamp" : datetime.fromtimestamp(cls._first_operation_timestamp).strftime(cls._time_str_format),
+                    "_first_of_five_operations_timestamp" : datetime.fromtimestamp(cls._first_of_five_operations_timestamp).strftime(cls._time_str_format),
+                    # "limit_exceeded_at": datetime.now().strftime(cls._time_str_format)
+                }
+        with open(cls._config_file, "w") as fh:
+            json.dump(log_data, fh, indent=4)
+
+    @classmethod
+    def set_daily_api_timeout_excedded(cls):
+        cls._current_operations_per_day = cls._max_requests_per_day
+        cls.save_status()
+        raise DailyReuestsAmountExceded("No more API requests available this day")
+
+
+    @classmethod
     def check_api_timeout(cls):
         if not cls._first_operation_timestamp:
             if os.path.exists(cls._config_file):
@@ -74,24 +96,15 @@ class ApiTimeoutManager():
             else:
                 cls._first_operation_timestamp = time.time()
                 cls._first_of_five_operations_timestamp = cls._first_operation_timestamp
-        log_data = {
-                    "_max_requests_per_minute" : cls._max_requests_per_minute,
-                    "_max_requests_per_day" : cls._max_requests_per_day,
-                    "_current_operations_per_day" : cls._current_operations_per_day,
-                    "_current_operations_per_minute" : cls._current_operations_per_minute,
-                    "_first_operation_timestamp" : datetime.fromtimestamp(cls._first_operation_timestamp).strftime(cls._time_str_format),
-                    "_first_of_five_operations_timestamp" : datetime.fromtimestamp(cls._first_of_five_operations_timestamp).strftime(cls._time_str_format),
-                    # "limit_exceeded_at": datetime.now().strftime(cls._time_str_format)
-                }
+        
         cls._current_operations_per_day += 1
         cls._current_operations_per_minute += 1
-        with open(cls._config_file, "w") as fh:
-            json.dump(log_data, fh, indent=4)
+        cls.save_status()
         if cls._current_operations_per_minute > cls._max_requests_per_minute:
             diff = time.time() - cls._first_of_five_operations_timestamp
             minute_in_seconds = 60
             if diff < minute_in_seconds:
-                break_time = minute_in_seconds - diff + 2 # to be sure
+                break_time = minute_in_seconds - diff + 10 # to be sure
                 logger.info(f"Exceed max amount of requests per minute wait for {break_time} seconds")
                 time.sleep(break_time)
                 cls.reset_minute_counter()
@@ -103,8 +116,13 @@ class ApiTimeoutManager():
             day_in_seconds = 24 * 60 * 60
             if diff < day_in_seconds:
                 break_time = day_in_seconds - diff + 60 # just to be sure
-                logger.info(f"Exceed maximum requests per day. Will wait for {time.strftime('%H hours %M minutes and %S seconds', time.gmtime(break_time))} seconds")
-                raise DailyReuestsAmountExceded("No more API requests available this day")
+                if break_time <= 60 * 20:
+                    logger.info(f"Exceed maximum requests per day. Will wait for {time.strftime('%H hours %M minutes and %S seconds', time.gmtime(break_time))} seconds")
+                    time.sleep(break_time)
+                    cls.reset_day_counter()
+                else:
+                    logger.warning(f"Waiting time is too high ({time.strftime('%H hours %M minutes and %S seconds', time.gmtime(break_time))}), please try again later. Maximum allowed wait time is 20 min.")
+                    raise DailyReuestsAmountExceded("No more API requests available this day")
             else:
                 cls.reset_day_counter()
                 # time.str
@@ -129,6 +147,11 @@ class AlphaVantage():
             for key, value in kwargs.items():
                 base_url += f"&{key}={value}"
         return base_url
+
+    @classmethod
+    def search_tickers(cls, ticker):
+        logger.info(f"Search tickers that contain {ticker}")
+        return cls.request_data(API_FUNCTIONS.SYMBOL_SEARCH.value, None, keywords=ticker)
 
     @classmethod
     def get_income(cls, ticker):        
@@ -170,16 +193,22 @@ class AlphaVantage():
         logger.debug(f"request to {url}")
         if output_format == "json":
             r = requests.get(url)
-            # import pdb;pdb.set_trace()
-            return r.json()
+            json_ret = r.json()
+            if 'Note' in json_ret:
+                logger.warning("it may happen that we exceded daily amount of API calls. Wailting for a minute and retry")
+                time.sleep(90) # 60 + 30 to be sure
+                cls.check_api_timeout()
+                logger.info(f"Retry requesting data for {ticker} function {function}")
+                r = requests.get(url)
+                json_ret = r.json()
+                if 'Note' in json_ret:
+                    ApiTimeoutManager.set_daily_api_timeout_excedded()
+            return json_ret
         else:
             with requests.Session() as s:
                 download = s.get(url)
                 decoded_content = download.content.decode('utf-8')
             return decoded_content
-            # import pdb;pdb.set_trace()
-                # cr = csv.reader(decoded_content.splitlines(), delimiter=',')
-                # my_list = list(cr)
             return None
     
     @classmethod
