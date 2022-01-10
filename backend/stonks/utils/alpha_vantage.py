@@ -58,7 +58,8 @@ class ApiTimeoutManager():
     @classmethod
     def reset_day_counter(cls):
         cls._current_operations_per_day = 1
-        cls._first_operation_timestamp = time.time()
+        today = datetime.now().date()
+        cls._first_operation_timestamp = datetime(today.year, today.month, today.day, 3).timestamp()
 
     @classmethod
     def save_status(cls):
@@ -84,6 +85,7 @@ class ApiTimeoutManager():
     @classmethod
     def check_api_timeout(cls):
         if not cls._first_operation_timestamp:
+            today = datetime.now().date()
             if os.path.exists(cls._config_file):
                 with open(cls._config_file, 'r') as fh:
                     config = json.load(fh)
@@ -91,11 +93,18 @@ class ApiTimeoutManager():
                 cls._max_requests_per_day = config["_max_requests_per_day"]
                 cls._current_operations_per_day = config["_current_operations_per_day"]
                 cls._current_operations_per_minute = config["_current_operations_per_minute"]
-                cls._first_operation_timestamp = datetime.strptime(config["_first_operation_timestamp"], cls._time_str_format).timestamp()
+                config_time = datetime.strptime(config["_first_operation_timestamp"], cls._time_str_format)
+                if config_time.date() < today:
+                    config_time = datetime(today.year, today.month, today.day, 3)
+                    cls._current_operations_per_day = 0
+                cls._first_operation_timestamp = config_time.timestamp()
                 cls._first_of_five_operations_timestamp = datetime.strptime(config["_first_of_five_operations_timestamp"], cls._time_str_format).timestamp()
+                if time.time() - cls._first_of_five_operations_timestamp > 60:
+                    cls._first_of_five_operations_timestamp = time.time()
+                    cls._current_operations_per_minute = 0
             else:
-                cls._first_operation_timestamp = time.time()
-                cls._first_of_five_operations_timestamp = cls._first_operation_timestamp
+                cls._first_operation_timestamp = datetime(today.year, today.month, today.day, 3).timestamp()
+                cls._first_of_five_operations_timestamp = time.time()
         
         cls._current_operations_per_day += 1
         cls._current_operations_per_minute += 1
@@ -103,6 +112,7 @@ class ApiTimeoutManager():
         if cls._current_operations_per_minute > cls._max_requests_per_minute:
             diff = time.time() - cls._first_of_five_operations_timestamp
             minute_in_seconds = 60
+            # import pdb;pdb.set_trace()
             if diff < minute_in_seconds:
                 break_time = minute_in_seconds - diff + 10 # to be sure
                 logger.info(f"Exceed max amount of requests per minute wait for {break_time} seconds")
@@ -110,8 +120,9 @@ class ApiTimeoutManager():
                 cls.reset_minute_counter()
             else:
                 cls.reset_minute_counter()
-        
+
         if cls._current_operations_per_day > cls._max_requests_per_day:
+
             diff =  time.time() - cls._first_operation_timestamp
             day_in_seconds = 24 * 60 * 60
             if diff < day_in_seconds:
@@ -256,7 +267,7 @@ def api_timeout_manager_test():
     # add ch to logger
     logger.addHandler(handler)
 
-    ApiTimeoutManager._set_requests_limiters(5, 12)
+    ApiTimeoutManager._set_requests_limiters(5, 10)
     start_time = time.time()
     
     for i in range(1,15):
