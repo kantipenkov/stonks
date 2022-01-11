@@ -50,4 +50,5 @@ if __name__ == '__main__':
                 # raise
     except DailyReuestsAmountExceded as e:
         logger.warning("Daily limit of requests exceded")
+        raise
     update_earnings_dates(6)

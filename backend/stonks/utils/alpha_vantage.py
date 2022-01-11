@@ -1,4 +1,5 @@
 from datetime import datetime
+from json.decoder import JSONDecodeError
 from pprint import pprint
 # import pdb
 
@@ -204,7 +205,15 @@ class AlphaVantage():
         logger.debug(f"request to {url}")
         if output_format == "json":
             r = requests.get(url)
-            json_ret = r.json()
+            try:
+                json_ret = r.json()
+            except JSONDecodeError as e:
+                logger.warning(f"failed to parse response. Error {str(e)}. Retrying...")
+                time.sleep(30)
+                cls.check_api_timeout()
+                r = requests.get(url)
+                json_ret = r.json()
+
             if 'Note' in json_ret or 'Information' in json_ret:
                 logger.warning("it may happen that we exceded daily amount of API calls. Wailting for a minute and retry")
                 time.sleep(90) # 60 + 30 to be sure
