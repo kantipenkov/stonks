@@ -72,7 +72,7 @@ def process_prices(json_data):
             as_pp = PricePointTuple(*after_split)
             rf = Fraction(bs_pp.close / as_pp.open)
             split_ratio = rf.limit_denominator(2)
-            for i in range(3,20):
+            for i in range(3,100):
                 if split_ratio.numerator > 0 and abs((bs_pp.close / as_pp.open) - split_ratio.numerator / split_ratio.denominator) / (bs_pp.close / as_pp.open) < 0.1:
                     break
                 split_ratio = rf.limit_denominator(i)
