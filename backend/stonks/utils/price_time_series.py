@@ -70,15 +70,16 @@ def process_prices(json_data):
         for before_split, after_split in prices[days_around_ind].reshape(indices.shape[0], -1, 6):
             bs_pp = PricePointTuple(*before_split)
             as_pp = PricePointTuple(*after_split)
-            rf = Fraction(bs_pp.close / as_pp.open)
-            split_ratio = rf.limit_denominator(2)
-            for i in range(3,100):
-                if split_ratio.numerator > 0 and abs((bs_pp.close / as_pp.open) - split_ratio.numerator / split_ratio.denominator) / (bs_pp.close / as_pp.open) < 0.1:
-                    break
-                split_ratio = rf.limit_denominator(i)
-            logger.info(f"Potential split date {as_pp.date} " \
-                f"ratio {split_ratio.numerator}:{split_ratio.denominator}")
-            splits.append(SplitPoint(as_pp.timestamp, split_ratio))
+            if bs_pp.volume > 0 and as_pp.volume > 0:
+                rf = Fraction(bs_pp.close / as_pp.open)
+                split_ratio = rf.limit_denominator(2)
+                for i in range(3,100):
+                    if split_ratio.numerator > 0 and abs((bs_pp.close / as_pp.open) - split_ratio.numerator / split_ratio.denominator) / (bs_pp.close / as_pp.open) < 0.1:
+                        break
+                    split_ratio = rf.limit_denominator(i)
+                logger.info(f"Potential split date {as_pp.date} " \
+                    f"ratio {split_ratio.numerator}:{split_ratio.denominator}")
+                splits.append(SplitPoint(as_pp.timestamp, split_ratio))
         # import pdb;pdb.set_trace()
         for split_point in splits[::-1]:
             inds = np.where(prices[:,0] < split_point.timestamp)[0]
