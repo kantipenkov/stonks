@@ -70,3 +70,16 @@ LKOH: Cant feth data for LKOH.LON
 PLZL: Cant feth data for PLZL.LON
 BSPB: failed to get data for BSPB from API.
 
+UNKL: failed to get data for UNKL from API.
+MSST: Cant feth data for MSSTF
+SERV: failed to get data for SERV from API. Search found too many results. Manual input required
+TCSG: Cant feth data for TCSGX
+MGTSP: failed to get data for MGTSP from API.
+SBER: failed to get data for SBER from API. Search found too many results. Manual input required
+IFX@DE: failed to get data for IFX@DE from API.
+HIIQ: failed to get data for HIIQ from API.
+1COV@DE: failed to get data for 1COV@DE from API.
+AIV_old: failed to get data for AIV_OLD from API.
+PHOR: Cant feth data for PHOR.LON
+PRFN: failed to get data for PRFN from API.
+SVAV: failed to get data for SVAV from API.
