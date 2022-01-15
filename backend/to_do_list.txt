@@ -12,4 +12,4 @@
    b. add telegram bot to send notifications
    c. implement notifications with more complex triggers (intersections with ascillators)
 5. users app
-check ARWR real splits are 2011-11-17 1:10 and 2004-01-15 bu we get way more
+get real splits from seeking alpha https://seekingalpha.com/symbol/SWN/splits

@@ -127,7 +127,7 @@ class TickerData():
         update_required = False
         if last_income_report:
             cur_date = datetime.now().date()
-            if (cur_date - last_income_report.date_reported).days > 120:
+            if (cur_date - last_income_report.date_reported).days > 365:
                 update_required = True
                 existing_income_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyIncomeReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
 
@@ -182,7 +182,7 @@ class TickerData():
         update_required = False
         if last_balance_report:
             cur_date = datetime.now().date()
-            if (cur_date - last_balance_report.date_reported).days > 120:
+            if (cur_date - last_balance_report.date_reported).days > 365:
                 update_required = True
                 existing_balance_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyBalanceReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
         else:
@@ -249,7 +249,7 @@ class TickerData():
         update_required = False
         if last_cash_flow_report:
             cur_date = datetime.now().date()
-            if (cur_date - last_cash_flow_report.date_reported).days > 120:
+            if (cur_date - last_cash_flow_report.date_reported).days > 365:
                 update_required = True
                 existing_cash_flow_reports = list(map(lambda x: (x[0].strftime("%Y-%m-%d"), x[1]), CompanyCashFlowReport.objects.filter(company=company).values_list('date_reported', 'report_type')))
         else:

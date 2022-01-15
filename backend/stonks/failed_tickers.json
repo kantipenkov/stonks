@@ -42,8 +42,6 @@ LKOD@GS: failed to get data for LKOD@GS from API.
 SELG: Cant feth data for AXLM
 KLSB: failed to get data for KLSB from API.
 
-TGNA: 'Time Series (Daily)'
-
 
 FLOT: failed to get data for FLOT from API. Search found too many results. Manual input required
 GRNT: Cant feth data for GRNTF
@@ -83,3 +81,16 @@ AIV_old: failed to get data for AIV_OLD from API.
 PHOR: Cant feth data for PHOR.LON
 PRFN: failed to get data for PRFN from API.
 SVAV: failed to get data for SVAV from API.
+
+WLTW: 'Time Series (Daily)' checked
+UNAC: Cant feth data for UNACX
+IRGZ: failed to get data for IRGZ from API.
+FLIR: failed to get data for FLIR from API.
+
+SHL@DE: failed to get data for SHL@DE from API.
+ALXN: failed to get data for ALXN from API.
+MTX@DE: failed to get data for MTX@DE from API.
+RUSP: Cant feth data for RUSPX
+NOV_old: failed to get data for NOV_OLD from API.
+SSA@GS: failed to get data for SSA@GS from API.
+
