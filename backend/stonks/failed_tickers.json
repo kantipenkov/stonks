@@ -94,3 +94,11 @@ RUSP: Cant feth data for RUSPX
 NOV_old: failed to get data for NOV_OLD from API.
 SSA@GS: failed to get data for SSA@GS from API.
 
+HEN3@DE: failed to get data for HEN3@DE from API.
+DB1@DE: failed to get data for DB1@DE from API.
+ECHO: failed to get data for ECHO from API. Search found too many results. Manual input required
+BFYT: failed to get data for BFYT from API.
+COR: failed to get data for COR from API. Search found too many results. Manual input required
+AMEZ: failed to get data for AMEZ from API.
+DSKY: Cant feth data for DSKYF
+XLRN: failed to get data for XLRN from API.

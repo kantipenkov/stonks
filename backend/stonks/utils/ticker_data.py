@@ -346,11 +346,11 @@ class TickerData():
                     if len(search_results['bestMatches']) == 0:
                         raise TickerNotFound(f"failed to get data for {self.ticker} from API.")
                     if len(search_results['bestMatches']) > 1:
-                        raise TickerNotFound(f"failed to get data for {self.ticker} from API. Search found too many results. Manual input required")
+                        raise TickerNotFound(f"failed to get data for {self.ticker} from API. Search found to many results. Manual input required")
                     self.ticker = search_results['bestMatches'][0]['1. symbol']
                     self.overview = AlphaVantage.get_overview(self.ticker)
                     if not self.overview:
-                        raise TickerNotFound(f"Cant feth data for {self.ticker}")
+                        raise TickerNotFound(f"Cant fetch data for {self.ticker}")
                     
             # import pdb;pdb.set_trace()
             company = Company(
