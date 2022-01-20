@@ -39,6 +39,7 @@ if __name__ == '__main__':
             with open(tickers_file, 'r') as fh:
                 tickers = json.load(fh)
     logger.debug('ap')
+    failed_tickers = list()
     try:
         for ticker in tickers:
             ticker_data = TickerData(ticker)
@@ -47,8 +48,15 @@ if __name__ == '__main__':
             except (TickerNotFound, KeyError) as e:
                 logger.warning(f"Cant get data for {ticker}")
                 log_failed_ticker(f"{ticker}: {str(e)}")
+                failed_tickers.append(ticker)
                 # raise
+        update_earnings_dates(6)
     except DailyReuestsAmountExceded as e:
         logger.warning("Daily limit of requests exceded")
-        raise
-    update_earnings_dates(6)
+    finally:
+        tickers = [x for x in tickers if x not in failed_tickers]
+        if len(sys.argv) > 1:
+            tickers_file = sys.argv[1]
+            if os.path.exists(tickers_file):
+                with open(tickers_file, 'w') as fh:
+                    tickers = json.dump(tickers, fh, indent=4)

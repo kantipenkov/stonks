@@ -305,7 +305,7 @@ class TickerData():
         if not last_price_point:
             update_required = True
         else:
-            if (datetime.now().date() - last_price_point.date).days > 20:
+            if (datetime.now().date() - last_price_point.date).days > 50:
                 update_required = True
         if update_required:
             logger.info(f"Update prices history for {company.ticker}")
