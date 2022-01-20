@@ -1,6 +1,6 @@
 1. database
-    a. ticker (overview, next earnings date)
-    b. price series
+    a. ticker (overview, next earnings date) done
+    b. price series refactor to work with csv requests and add support for 2 more columns (divs and splits)
     c. set up a worker to update the base in timely manner
 2. in ticker model implement metricks calculation
    a. add historical comparisons of price growth and earnings/sales/etc growth to indicate if there is correlation
