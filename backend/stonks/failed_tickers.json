@@ -165,3 +165,8 @@ DRNA: failed to get data for DRNA from API. Search found to many results. Manual
 SBERP: failed to get data for SBERP from API.
 RDS.A: failed to get data for RDS.A from API.
 POGR: Cant fetch data for POGRX
+HOT@DE: failed to get data for HOT@DE from API.
+BF.B: failed to get data for BF.B from API.
+CHEP: failed to get data for CHEP from API.
+KBTK: failed to get data for KBTK from API.
+CY: failed to get data for CY from API. Search found to many results. Manual input required
