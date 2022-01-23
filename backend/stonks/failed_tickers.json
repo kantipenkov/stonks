@@ -170,3 +170,39 @@ BF.B: failed to get data for BF.B from API.
 CHEP: failed to get data for CHEP from API.
 KBTK: failed to get data for KBTK from API.
 CY: failed to get data for CY from API. Search found to many results. Manual input required
+LENT: failed to get data for LENT from API. Search found to many results. Manual input required
+EVT@DE: failed to get data for EVT@DE from API.
+AANold: failed to get data for AANOLD from API.
+POLold: failed to get data for POLOLD from API.
+GCHE: failed to get data for GCHE from API.
+VNA@DE: failed to get data for VNA@DE from API.
+MSNG: failed to get data for MSNG from API.
+TATNP: failed to get data for TATNP from API.
+SNGS: failed to get data for SNGS from API. Search found to many results. Manual input required
+PRAH: Cant fetch data for PRAHX
+WORK: failed to get data for WORK from API. Search found to many results. Manual input required
+TGKA: failed to get data for TGKA from API.
+ALV@DE: failed to get data for ALV@DE from API.
+VKCO: Cant fetch data for VKCO.LON
+RNFT: Cant fetch data for RNFTF
+AKRN: Cant fetch data for AKRN.LON
+LUMNold: failed to get data for LUMNOLD from API.
+TE: failed to get data for TE from API. Search found to many results. Manual input required
+FTRE: failed to get data for FTRE from API.
+BOSS@DE: failed to get data for BOSS@DE from API.
+KMAZ: failed to get data for KMAZ from API.
+RWE@DE: failed to get data for RWE@DE from API.
+NLMK@GS: failed to get data for NLMK@GS from API.
+OGKB: failed to get data for OGKB from API.
+RSTI: failed to get data for RSTI from API.
+PFPT: failed to get data for PFPT from API.
+GSH: failed to get data for GSH from API. Search found to many results. Manual input required
+RUAL_old: failed to get data for RUAL_OLD from API.
+TATN: failed to get data for TATN from API.
+TORS: Cant fetch data for TORSF
+MGNT@GS: failed to get data for MGNT@GS from API.
+PMSBP: failed to get data for PMSBP from API.
+RTKM: failed to get data for RTKM from API.
+CCMP_old: failed to get data for CCMP_OLD from API.
+VSMO: failed to get data for VSMO from API.
+MVID: failed to get data for MVID from API.
