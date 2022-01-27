@@ -38,6 +38,8 @@ class PricePointTuple(PricePointBase):
 def apply_split(num, split_ratio: Fraction):
     return num / split_ratio.numerator * split_ratio.denominator
 
+# need methods to apply ar revert splits
+# maybe we don't need to apply detect and apply splits here
 def process_prices(json_data):
     # data_file = Path('series_test.json')
     # with data_file.open('r') as fh:

@@ -310,6 +310,7 @@ class TickerData():
         if update_required:
             logger.info(f"Update prices history for {company.ticker}")
             existing_price_points = list(map(lambda x: datetime.combine(x[0], datetime.min.time()).timestamp(), PricePoint.objects.filter(company=company).values_list('date') ))
+            # we should request only data we need not all the data
             price_series = AlphaVantage.get_price_series(self.ticker)
             price_series, splits = process_prices(price_series)
             # get existing values
