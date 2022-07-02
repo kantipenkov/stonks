@@ -1,8 +1,8 @@
 {
     "_max_requests_per_minute": 5,
     "_max_requests_per_day": 500,
-    "_current_operations_per_day": 266,
-    "_current_operations_per_minute": 4,
-    "_first_operation_timestamp": "2022-01-27 03:00:00",
-    "_first_of_five_operations_timestamp": "2022-01-27 07:09:00"
+    "_current_operations_per_day": 6,
+    "_current_operations_per_minute": 6,
+    "_first_operation_timestamp": "2022-07-02 03:00:00",
+    "_first_of_five_operations_timestamp": "2022-07-02 14:16:53"
 }

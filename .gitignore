@@ -126,3 +126,5 @@ dmypy.json
 # database
 /backend/data
 *.sql
+selenium/tmp2/
+selenium/tmp/

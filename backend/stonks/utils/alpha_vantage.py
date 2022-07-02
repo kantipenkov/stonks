@@ -229,7 +229,6 @@ class AlphaVantage():
                 download = s.get(url)
                 decoded_content = download.content.decode('utf-8')
             return decoded_content
-            return None
     
     @classmethod
     def get_price_series(cls, ticker):

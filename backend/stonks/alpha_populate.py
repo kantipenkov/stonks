@@ -32,7 +32,8 @@ def log_failed_ticker(msg):
 if __name__ == '__main__':
     api_key = "VLFPX8TAR2XREWC2"
     AlphaVantage.api_key = api_key
-    tickers = ('NVDA', 'AMD', 'INTC', 'WLTW', 'TGNA')
+    # tickers = ('NVDA', 'AMD', 'INTC', 'WLTW', 'TGNA')
+    tickers = ('NVDA', )
     if len(sys.argv) > 1:
         tickers_file = sys.argv[1]
         if os.path.exists(tickers_file):

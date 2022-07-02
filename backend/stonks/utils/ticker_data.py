@@ -326,6 +326,7 @@ class TickerData():
                         "close": float(day_data.close),
                         "volume": float(day_data.volume),
                     }
+                    # splits processing should be moved to a separate operation
                     if day_data.timestamp in splits:
                         id = np.where(splits == day_data.timestamp)[0][0]
                         split = splits[id, 1]
