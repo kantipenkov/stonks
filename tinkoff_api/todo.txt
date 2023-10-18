@@ -1,0 +1,2 @@
+helpers to get ticker by figi and vice versa
+helper to get current prices of goldTOM, silverTOM usd and calculate effective price of the metal to understand if there is a mismatch in real prices
